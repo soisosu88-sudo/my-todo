@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
+  <title>ToDo</title>
+
+  <!-- PWA Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ToDo">
+
+  <!-- ★ホーム画面アイコン：アザラシ（🦭） -->
+  <link rel="apple-touch-icon" href="https://fav.farm/🦭">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --accent-orange: #ff5500;
+      --orange-hover: #e04b00;
+      --btn-green: #15803d;
+      --btn-green-hover: #166534;
+      --light-green-tint: #f0fdf4;
+      --mint-border: #c8e6c9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 24px 16px;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      letter-spacing: -0.01em;
+      background-color: #d8ece0;
+    }
+
+    /* 淡いトーンの有機的リキッドシェイプ背景SVG */
+    .bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 32px;
+      padding: 24px 18px;
+      box-shadow: 0 16px 38px rgba(16, 60, 30, 0.08), 0 2px 10px rgba(0, 0, 0, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin: 0;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    .char-avatar-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform 0.25s var(--ease-spring);
+    }
+
+    .char-avatar-btn:active {
+      transform: scale(0.88) rotate(-6deg);
+    }
+
+    .char-img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.08));
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 10px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, background-color 0.2s, transform 0.2s var(--ease-spring);
+    }
+
+    .icon-btn:hover { color: var(--accent-orange); }
+    .icon-btn:active {
+      transform: scale(0.9);
+      background-color: #f1f5f9;
+    }
+
+    .del-category-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 10px;
+      transition: color 0.2s, background-color 0.2s, transform 0.2s var(--ease-spring);
+    }
+    .del-category-btn:hover {
+      color: #dc2626;
+    }
+    .del-category-btn:active {
+      transform: scale(0.92);
+      background-color: #fee2e2;
+    }
+
+    /* Tabs */
+    .tabs-wrapper {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+      scrollbar-width: none;
+    }
+    .tabs-wrapper::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      padding: 8px 16px;
+      background: rgba(241, 245, 249, 0.85);
+      border: 2px solid transparent;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.25s var(--ease-spring), background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .tab-btn:active {
+      transform: scale(0.92);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-orange);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(255, 85, 0, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .tab-btn.active:active {
+      transform: scale(0.94) translateY(0);
+    }
+
+    .add-tab-btn {
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px dashed #cbd5e1;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 0.83rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.2s var(--ease-spring), border-color 0.2s;
+    }
+
+    .add-tab-btn:active {
+      transform: scale(0.92);
+      border-color: var(--accent-orange);
+    }
+
+    /* Form */
+    .add-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .add-input {
+      flex: 1;
+      padding: 11px 16px;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s ease;
+      color: var(--text-main);
+    }
+    .add-input::placeholder {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .add-input:focus {
+      border-color: var(--accent-orange);
+    }
+
+    .add-btn {
+      padding: 11px 20px;
+      background: var(--btn-green);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);
+      transition: transform 0.2s var(--ease-spring), background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .add-btn:active {
+      transform: scale(0.92);
+      background: var(--btn-green-hover);
+      box-shadow: 0 2px 6px rgba(21, 128, 61, 0.2);
+    }
+
+    /* All done */
+    .all-done-grid {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.5s var(--ease-smooth);
+    }
+
+    .all-done-grid.visible {
+      grid-template-rows: 1fr;
+    }
+
+    .all-done-inner {
+      overflow: hidden;
+    }
+
+    .all-done {
+      text-align: center;
+      padding: 12px;
+      margin-bottom: 16px;
+      background: #dcfce7;
+      color: #15803d;
+      border-radius: 16px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+      border: 2px solid #86efac;
+      opacity: 0;
+      transform: scale(0.94) translateY(-6px);
+      transition: opacity 0.4s var(--ease-smooth), transform 0.5s var(--ease-smooth);
+    }
+
+    .all-done-grid.visible .all-done {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      transition-delay: 0.05s;
+    }
+
+    /* Items */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+      min-height: 50px;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      padding: 9px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1.5px solid var(--mint-border);
+      transition: background-color 0.35s var(--ease-smooth),
+                  border-color 0.35s var(--ease-smooth),
+                  color 0.35s var(--ease-smooth),
+                  opacity 0.35s var(--ease-smooth),
+                  transform 0.2s ease;
+    }
+
+    .item-row.checked {
+      background: #e2f0d9;
+      border-color: #a3d9a5;
+      color: #1e6b27;
+      opacity: 0.85;
+    }
+
+    .item-text {
+      flex: 1;
+      font-size: 0.94rem;
+      line-height: 1.35;
+      transition: opacity 0.35s var(--ease-smooth), color 0.35s var(--ease-smooth);
+    }
+
+    .item-row.checked .item-text {
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+    }
+
+    .item-row.bounce-pop {
+      animation: ultraSmoothSpring 0.55s cubic-bezier(0.25, 1, 0.5, 1) both;
+    }
+
+    @keyframes ultraSmoothSpring {
+      0% { transform: scale(1) translateY(0); }
+      25% { transform: scale(1.03) translateY(-3px); }
+      55% { transform: scale(0.99) translateY(0.5px); }
+      80% { transform: scale(1.005) translateY(-0.5px); }
+      100% { transform: scale(1) translateY(0); }
+    }
+
+    .item-content {
+      display: flex;
+      align-items: center;
+      flex-grow: 1;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      margin-right: 12px;
+      accent-color: var(--accent-orange);
+      pointer-events: none;
+      transition: transform 0.4s var(--ease-spring);
+    }
+
+    .item-row.bounce-pop .checkbox {
+      transform: scale(1.18);
+    }
+
+    .del-item-btn {
+      background: none;
+      border: none;
+      color: #cbd5e1;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      text-decoration: none !important;
+      transition: transform 0.2s var(--ease-spring), color 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .del-item-btn:hover { color: #ef4444; }
+    .del-item-btn:active { transform: scale(0.85); color: #ef4444; }
+
+    /* Reset Button */
+    .reset-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent-orange);
+      color: #ffffff;
+      border: none;
+      border-radius: 18px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(255, 85, 0, 0.32);
+      transition: transform 0.25s var(--ease-spring), background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .reset-btn:active {
+      transform: scale(0.96);
+      background: var(--orange-hover);
+      box-shadow: 0 2px 10px rgba(255, 85, 0, 0.25);
+    }
+
+    .empty-hint {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 20px 0;
+    }
+
+    /* Modal for Settings */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.14);
+      transform: scale(0.92);
+      transition: transform 0.3s var(--ease-spring);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      margin: 0 0 16px 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .setting-item {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .setting-label {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--text-main);
+    }
+
+    .setting-subtext {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .time-input {
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      outline: none;
+      color: var(--text-main);
+    }
+    .time-input:focus {
+      border-color: var(--accent-orange);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease-spring);
+    }
+    .modal-btn:active {
+      transform: scale(0.95);
+    }
+    .modal-btn.primary {
+      background: var(--accent-orange);
+      color: #fff;
+    }
+    .modal-btn.secondary {
+      background: #f1f5f9;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 淡いペールトーンのリキッドシェイプ背景SVG -->
+  <svg class="bg-canvas" viewBox="0 0 1000 1600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- ソフトグリーンベース -->
+      <linearGradient id="soft-green-base" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#ebf7ee"/>
+        <stop offset="50%" stop-color="#dff2e4"/>
+        <stop offset="100%" stop-color="#d0ead7"/>
+      </linearGradient>
+
+      <!-- 優しいペールオレンジ / ピーチ -->
+      <linearGradient id="soft-peach-primary" x1="0%" y1="20%" x2="100%" y2="80%">
+        <stop offset="0%" stop-color="#ffe4c4"/>
+        <stop offset="50%" stop-color="#ffd2a8"/>
+        <stop offset="100%" stop-color="#fbb688"/>
+      </linearGradient>
+
+      <!-- やわらかなパステルイエロー / ウォーム -->
+      <linearGradient id="soft-amber" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fff4cc"/>
+        <stop offset="100%" stop-color="#ffe2a3"/>
+      </linearGradient>
+
+      <!-- 爽やかなライトミントグリーン -->
+      <linearGradient id="soft-mint" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#c9eed6"/>
+        <stop offset="100%" stop-color="#aee1c0"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ベースカラー -->
+    <rect width="1000" height="1600" fill="url(#soft-green-base)"/>
+
+    <!-- 右上・中央の淡いイエロー有機シェイプ -->
+    <path d="M550,-100 C750,-80 1100,50 1050,380 C1000,700 820,680 720,780 C600,900 680,1050 560,1180 C450,1300 240,1180 150,1080 C60,980 200,820 280,720 C380,600 450,450 480,260 C500,120 400,-120 550,-100 Z" fill="url(#soft-amber)" opacity="0.65"/>
+
+    <!-- 左上・中央左のやわらかなミントグリーン層 -->
+    <path d="M-150,-50 C120,-60 260,120 280,320 C300,520 120,640 180,820 C240,1000 420,1050 430,1250 C440,1450 200,1580 -50,1650 C-180,1700 -250,1400 -250,1100 C-250,800 -220,500 -220,200 Z" fill="url(#soft-mint)" opacity="0.75"/>
+
+    <!-- 優しいピーチオレンジの流体シェイプ -->
+    <path d="M-80,80 C60,70 140,220 180,380 C230,580 80,740 60,920 C40,1100 220,1220 300,1320 C400,1450 520,1460 560,1650 L-100,1650 Z" fill="url(#soft-peach-primary)" opacity="0.7"/>
+    
+    <path d="M850,220 C1050,300 1100,580 980,750 C860,920 700,880 620,1050 C540,1220 620,1400 500,1580 C400,1720 250,1680 150,1620 C280,1480 340,1360 300,1200 C250,1000 360,820 480,720 C620,600 700,500 740,360 C770,250 720,160 850,220 Z" fill="url(#soft-peach-primary)" opacity="0.65"/>
+
+    <!-- 右下の落ち着いたソフトオリーブグリーン -->
+    <path d="M600,1650 C620,1420 800,1300 920,1340 C1020,1370 1080,1450 1100,1650 Z" fill="#9ecdb0" opacity="0.55"/>
+
+    <!-- 装飾: 流線ウェーブライン (半透明のホワイトライン) -->
+    <g stroke="rgba(255,255,255,0.75)" fill="none" stroke-width="1.8">
+      <path d="M-50,600 Q150,550 200,750 T500,820 T780,740 T1050,900" />
+      <path d="M-50,620 Q160,570 210,770 T510,840 T790,760 T1050,920" opacity="0.7"/>
+      <path d="M-50,640 Q170,590 220,790 T520,860 T800,780 T1050,940" opacity="0.45"/>
+    </g>
+
+    <!-- 装飾: 幾何学アクセント (+ や ○) -->
+    <g fill="#ffffff" opacity="0.8">
+      <text x="180" y="320" font-size="28" font-family="sans-serif" font-weight="300">+</text>
+      <text x="760" y="520" font-size="28" font-family="sans-serif" font-weight="300">+</text>
+      <text x="340" y="1050" font-size="28" font-family="sans-serif" font-weight="300">+</text>
+      <text x="910" y="1420" font-size="28" font-family="sans-serif" font-weight="300">+</text>
+      
+      <circle cx="120" cy="180" r="8" fill="#ffffff" opacity="0.9" />
+      <circle cx="620" cy="1100" r="7" fill="#ffffff" opacity="0.9" />
+      <circle cx="920" cy="160" r="22" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.75" />
+      <circle cx="90" cy="1420" r="32" stroke="#ffffff" stroke-width="3.5" fill="none" opacity="0.65" />
+      <circle cx="680" cy="910" r="14" stroke="#ffffff" stroke-width="2.5" fill="none" opacity="0.75" />
+    </g>
+  </svg>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-container">
+    <div class="header">
+      <div class="title-group">
+        <h1>ToDo</h1>
+        <button class="char-avatar-btn" onclick="openImagePicker()" title="Change character">
+          <img id="char-img" class="char-img" src="" alt="Character">
+        </button>
+        <input type="file" id="char-file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="openSettingsModal()" title="Auto-reset settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </button>
+        <button class="del-category-btn" onclick="deleteCurrentCategory()">Delete Tab</button>
+      </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="tabs-wrapper">
+      <div id="tabs-container" style="display: flex; gap: 8px;"></div>
+      <button class="add-tab-btn" onclick="addNewCategory()">+ Category</button>
+    </div>
+
+    <!-- Add Item Form -->
+    <form class="add-form" onsubmit="addItem(event)">
+      <input type="text" id="new-item-input" class="add-input" placeholder="New item..." required>
+      <button type="submit" class="add-btn">Add</button>
+    </form>
+
+    <!-- Grid Banner -->
+    <div id="all-done-grid" class="all-done-grid">
+      <div class="all-done-inner">
+        <div class="all-done">All Completed!</div>
+      </div>
+    </div>
+
+    <!-- List -->
+    <div class="item-list" id="item-list"></div>
+
+    <!-- Reset Button -->
+    <button class="reset-btn" onclick="resetCurrentTab()">Reset List</button>
+  </div>
+
+  <!-- Settings Modal for Auto Reset -->
+  <div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <h2 class="modal-title">Daily Auto-Reset</h2>
+      <div class="setting-item">
+        <div class="setting-row">
+          <label class="setting-label" for="auto-reset-toggle">Enable reset</label>
+          <input type="checkbox" id="auto-reset-toggle" style="width: 20px; height: 20px; accent-color: var(--accent-orange);">
+        </div>
+        <div class="setting-row">
+          <label class="setting-label" for="auto-reset-time">Reset time</label>
+          <input type="time" id="auto-reset-time" class="time-input" value="04:00">
+        </div>
+        <div class="setting-subtext">
+          Unchecks all items automatically when this time is reached.
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeSettingsModal()">Cancel</button>
+        <button class="modal-btn primary" onclick="saveSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const defaultAvatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="55" rx="38" ry="34" fill="%23ffd166"/><circle cx="36" cy="48" r="4.5" fill="%231e293b"/><circle cx="64" cy="48" r="4.5" fill="%231e293b"/><circle cx="34.5" cy="46.5" r="1.5" fill="%23ffffff"/><circle cx="62.5" cy="46.5" r="1.5" fill="%23ffffff"/><ellipse cx="28" cy="55" rx="5" ry="3" fill="%23ff9f1c" opacity="0.45"/><ellipse cx="72" cy="55" rx="5" ry="3" fill="%23ff9f1c" opacity="0.45"/><polygon points="46,53 54,53 50,60" fill="%23ff5500"/><path d="M 42 22 Q 50 14 50 21" stroke="%23ff9f1c" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+
+    let userAvatar = localStorage.getItem("todoAppAvatar") || defaultAvatarSvg;
+    document.getElementById("char-img").src = userAvatar;
+
+    function openImagePicker() {
+      const choice = confirm("Change character image?\n\n- OK: Select a new image from your device\n- Cancel: Keep current");
+      if (choice) {
+        document.getElementById("char-file-input").click();
+      }
+    }
+
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const base64Data = event.target.result;
+        userAvatar = base64Data;
+        document.getElementById("char-img").src = userAvatar;
+        localStorage.setItem("todoAppAvatar", userAvatar);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    const defaultData = {
+      "General": [
+        { text: "Keys", checked: false },
+        { text: "Phone & Transit Card", checked: false },
+        { text: "Wallet", checked: false },
+        { text: "Lock Doors & Windows", checked: false }
+      ],
+      "Travel": [
+        { text: "Power Bank", checked: false },
+        { text: "Earphones", checked: false },
+        { text: "Umbrella", checked: false }
+      ]
+    };
+
+    let data = JSON.parse(localStorage.getItem("routineAppDataEn")) || defaultData;
+    let categories = Object.keys(data);
+    let currentCategory = categories[0] || "";
+    let wasAllCompleted = false;
+
+    /* Auto-Reset Settings */
+    let resetConfig = JSON.parse(localStorage.getItem("todoAutoResetConfig")) || {
+      enabled: false,
+      time: "04:00",
+      lastResetDate: ""
+    };
+
+    function checkAutoReset() {
+      if (!resetConfig.enabled) return;
+
+      const now = new Date();
+      const [resetHour, resetMinute] = resetConfig.time.split(":").map(Number);
+
+      const targetToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), resetHour, resetMinute, 0);
+      let thresholdDateStr = targetToday.toISOString().slice(0, 10);
+
+      if (now < targetToday) {
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        thresholdDateStr = yesterday.toISOString().slice(0, 10);
+      }
+
+      if (resetConfig.lastResetDate !== thresholdDateStr) {
+        Object.keys(data).forEach(cat => {
+          data[cat] = data[cat].map(item => ({ ...item, checked: false }));
+        });
+        resetConfig.lastResetDate = thresholdDateStr;
+        localStorage.setItem("todoAutoResetConfig", JSON.stringify(resetConfig));
+        saveData();
+        wasAllCompleted = false;
+        render();
+      }
+    }
+
+    function openSettingsModal() {
+      document.getElementById("auto-reset-toggle").checked = resetConfig.enabled;
+      document.getElementById("auto-reset-time").value = resetConfig.time;
+      document.getElementById("settings-modal").classList.add("active");
+    }
+
+    function closeSettingsModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById("settings-modal").classList.remove("active");
+    }
+
+    function saveSettings() {
+      resetConfig.enabled = document.getElementById("auto-reset-toggle").checked;
+      resetConfig.time = document.getElementById("auto-reset-time").value || "04:00";
+      localStorage.setItem("todoAutoResetConfig", JSON.stringify(resetConfig));
+      document.getElementById("settings-modal").classList.remove("active");
+      checkAutoReset();
+    }
+
+    setInterval(checkAutoReset, 60000);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") checkAutoReset();
+    });
+
+    function saveData() {
+      localStorage.setItem("routineAppDataEn", JSON.stringify(data));
+    }
+
+    function render(justToggledIndex = null) {
+      categories = Object.keys(data);
+
+      if (categories.length === 0) {
+        data["General"] = [];
+        categories = ["General"];
+        currentCategory = "General";
+      }
+
+      if (!categories.includes(currentCategory)) {
+        currentCategory = categories[0];
+      }
+
+      // Render Tabs
+      const tabsContainer = document.getElementById("tabs-container");
+      tabsContainer.innerHTML = "";
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = `tab-btn ${cat === currentCategory ? "active" : ""}`;
+        btn.textContent = cat;
+        btn.onclick = () => {
+          currentCategory = cat;
+          wasAllCompleted = false;
+          render();
+        };
+        tabsContainer.appendChild(btn);
+      });
+
+      // Render Items
+      const listContainer = document.getElementById("item-list");
+      listContainer.innerHTML = "";
+      const currentItems = data[currentCategory] || [];
+      let allChecked = currentItems.length > 0;
+
+      if (currentItems.length === 0) {
+        allChecked = false;
+        listContainer.innerHTML = `<div class="empty-hint">No items yet. Add one above.</div>`;
+      } else {
+        currentItems.forEach((item, index) => {
+          if (!item.checked) allChecked = false;
+
+          const row = document.createElement("div");
+          const bounceClass = (index === justToggledIndex && item.checked) ? "bounce-pop" : "";
+          row.className = `item-row ${item.checked ? "checked" : ""} ${bounceClass}`;
+          
+          row.innerHTML = `
+            <div class="item-content">
+              <input type="checkbox" class="checkbox" ${item.checked ? "checked" : ""}>
+              <span class="item-text">${item.text}</span>
+            </div>
+            <button class="del-item-btn" title="Delete">✕</button>
+          `;
+
+          row.querySelector(".item-content").addEventListener("click", () => toggleCheck(index));
+          row.querySelector(".del-item-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            deleteItem(index);
+          });
+
+          listContainer.appendChild(row);
+        });
+      }
+
+      // 完了クラッカー
+      if (allChecked && !wasAllCompleted) {
+        triggerCrackers();
+      }
+      wasAllCompleted = allChecked;
+
+      // Grid展開
+      const bannerGrid = document.getElementById("all-done-grid");
+      if (allChecked) {
+        bannerGrid.classList.add("visible");
+      } else {
+        bannerGrid.classList.remove("visible");
+      }
+
+      saveData();
+    }
+
+    function toggleCheck(index) {
+      data[currentCategory][index].checked = !data[currentCategory][index].checked;
+      render(index);
+    }
+
+    function addItem(e) {
+      e.preventDefault();
+      const input = document.getElementById("new-item-input");
+      const val = input.value.trim();
+      if (!val) return;
+
+      if (!data[currentCategory]) data[currentCategory] = [];
+      data[currentCategory].push({ text: val, checked: false });
+      input.value = "";
+      wasAllCompleted = false;
+      render();
+    }
+
+    function deleteItem(index) {
+      data[currentCategory].splice(index, 1);
+      render();
+    }
+
+    function resetCurrentTab() {
+      if (!data[currentCategory]) return;
+      data[currentCategory] = data[currentCategory].map(item => ({ ...item, checked: false }));
+      wasAllCompleted = false;
+
+      const rows = document.querySelectorAll(".item-row");
+      rows.forEach(row => {
+        row.classList.remove("checked", "bounce-pop");
+        const cb = row.querySelector(".checkbox");
+        if (cb) cb.checked = false;
+      });
+
+      document.getElementById("all-done-grid").classList.remove("visible");
+      saveData();
+    }
+
+    function addNewCategory() {
+      const name = prompt("Enter category name:");
+      if (!name) return;
+      const cleanName = name.trim();
+      if (!cleanName) return;
+
+      if (data[cleanName]) {
+        alert("Category already exists.");
+        currentCategory = cleanName;
+      } else {
+        data[cleanName] = [];
+        currentCategory = cleanName;
+      }
+      wasAllCompleted = false;
+      render();
+    }
+
+    function deleteCurrentCategory() {
+      if (categories.length <= 1) {
+        alert("Cannot delete the last remaining category.");
+        return;
+      }
+      const confirmDelete = confirm(`Delete "${currentCategory}" and all its items?`);
+      if (confirmDelete) {
+        delete data[currentCategory];
+        currentCategory = Object.keys(data)[0];
+        wasAllCompleted = false;
+        render();
+      }
+    }
+
+    /* Confetti Engine */
+    const canvas = document.getElementById("confetti-canvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    let animationFrameId = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    const colors = ["#ff5500", "#ff7733", "#22c55e", "#86efac", "#fbbf24", "#ffffff"];
+
+    function createParticleBottom(x, angleBase) {
+      const angle = angleBase + (Math.random() - 0.5) * 0.5;
+      const speed = Math.random() * 9 + 9;
+
+      return {
+        x: x,
+        y: canvas.height * 0.88,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: Math.random() * 7 + 5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 6,
+        wobble: Math.random() * Math.PI,
+        wobbleSpeed: Math.random() * 0.05 + 0.03,
+        opacity: 1
+      };
+    }
+
+    function createParticleTop() {
+      const angle = (Math.PI / 2) + (Math.random() - 0.5) * 0.8;
+      const speed = Math.random() * 6 + 3;
+
+      return {
+        x: Math.random() * canvas.width,
+        y: -15 - Math.random() * 20,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: Math.random() * 7 + 5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 6,
+        wobble: Math.random() * Math.PI,
+        wobbleSpeed: Math.random() * 0.05 + 0.03,
+        opacity: 1
+      };
+    }
+
+    function triggerCrackers() {
+      const leftCount = 70;
+      const rightCount = 70;
+      const topCount = 70;
+
+      for (let i = 0; i < leftCount; i++) {
+        particles.push(createParticleBottom(-15, -Math.PI / 3.8));
+      }
+      for (let i = 0; i < rightCount; i++) {
+        particles.push(createParticleBottom(canvas.width + 15, -Math.PI + Math.PI / 3.8));
+      }
+      for (let i = 0; i < topCount; i++) {
+        particles.push(createParticleTop());
+      }
+
+      if (!animationFrameId) {
+        updateConfetti();
+      }
+    }
+
+    function updateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+
+        p.vy += 0.22;
+        p.vx *= 0.978;
+        p.vy *= 0.978;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        p.rotation += p.rotationSpeed;
+        p.wobble += p.wobbleSpeed;
+
+        if (p.y > canvas.height * 0.65) {
+          p.opacity -= 0.012;
+        }
+
+        if (p.opacity <= 0 || p.y > canvas.height + 25) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.scale(Math.cos(p.wobble), 1);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        ctx.restore();
+      }
+
+      if (particles.length > 0) {
+        animationFrameId = requestAnimationFrame(updateConfetti);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        animationFrameId = null;
+      }
+    }
+
+    checkAutoReset();
+    render();
+  </script>
+</body>
+</html>
