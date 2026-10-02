@@ -45,7 +45,6 @@
     body {
       font-family: var(--font-pixel);
       margin: 0;
-      /* スマホ表示時にリスト全体が適度に下がるよう上部余白を調整 */
       padding: 32px 12px 24px 12px;
       color: var(--pixel-text);
       display: flex;
@@ -235,7 +234,8 @@
     .tabs-wrapper::-webkit-scrollbar { display: none; }
 
     .tab-btn {
-      padding: 5px 12px;
+      height: 30px;
+      padding: 0 12px;
       background: #f1f5f9;
       border: var(--line-border);
       box-shadow: 2px 2px 0px var(--pixel-shadow);
@@ -245,6 +245,9 @@
       color: var(--pixel-dark-gray);
       cursor: pointer;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       transition: transform 0.05s ease;
     }
 
@@ -255,26 +258,31 @@
       box-shadow: 0px 0px 0px var(--pixel-shadow);
     }
 
-    /* カテゴリ追加ボタン */
+    /* カテゴリ追加ボタン（タブと同じ高さ・配置に修正） */
     .add-tab-btn {
-      padding: 5px 10px;
+      height: 30px;
+      width: 32px;
+      padding: 0;
       background: #ffffff;
-      border: 2px dashed #94a3b8;
+      border: var(--line-border);
+      box-shadow: 2px 2px 0px var(--pixel-shadow);
       font-family: var(--font-pixel);
-      font-size: 0.72rem;
+      font-size: 0.85rem;
       line-height: 1;
       color: var(--pixel-dark-gray);
       cursor: pointer;
       white-space: nowrap;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.05s ease;
     }
     .add-tab-btn:active {
       background: #f8fafc;
-      border-color: var(--pixel-line);
       color: var(--pixel-text);
-      transform: translate(1px, 1px);
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px var(--pixel-shadow);
     }
 
     /* Status Panel */
@@ -690,16 +698,13 @@
     <div class="header">
       <div class="title-group">
         <h1>ToDo</h1>
-        <!-- タップでフキダシ / ダブルクリックまたは長押しで画像変更 -->
         <button class="char-avatar-btn" id="char-btn" title="Tap to talk / Long press to change">
           <img id="char-img" class="char-img" src="" alt="Character">
         </button>
-        <!-- レトロフキダシ -->
         <div id="speech-bubble" class="speech-bubble">タップしてね！</div>
         <input type="file" id="char-file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
       </div>
       <div class="header-actions">
-        <!-- GB風ドット・ベル通知アイコン -->
         <button class="icon-action-btn" onclick="openNotifyModal()" title="Notification settings">
           <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
             <rect x="7" y="1" width="2" height="2" />
@@ -710,7 +715,6 @@
             <rect x="7" y="13" width="2" height="2" />
           </svg>
         </button>
-        <!-- GB風ドット・時計アイコン -->
         <button class="icon-action-btn" onclick="openResetModal()" title="Auto-reset settings">
           <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
             <rect x="6" y="0" width="4" height="2" />
@@ -740,7 +744,6 @@
     <div class="status-panel">
       <div class="status-header">
         <div id="streak-display" class="streak-badge">
-          <!-- 8x8 Pixel Star SVG -->
           <svg viewBox="0 0 9 9" shape-rendering="crispEdges">
             <rect x="4" y="0" width="1" height="1"/>
             <rect x="4" y="1" width="1" height="1"/>
@@ -865,18 +868,18 @@
       },
       playCheck() {
         this.init();
-        this.playTone(523.25, 'square', 0.08, 0);       // C5
-        this.playTone(659.25, 'square', 0.12, 0.07);    // E5
+        this.playTone(523.25, 'square', 0.08, 0);
+        this.playTone(659.25, 'square', 0.12, 0.07);
       },
       playUncheck() {
         this.init();
-        this.playTone(440, 'square', 0.07, 0);          // A4
-        this.playTone(349.23, 'square', 0.10, 0.06);    // F4
+        this.playTone(440, 'square', 0.07, 0);
+        this.playTone(349.23, 'square', 0.10, 0.06);
       },
       playTalk() {
         this.init();
-        this.playTone(880, 'sine', 0.05, 0);            // A5
-        this.playTone(1174.66, 'sine', 0.06, 0.04);     // D6
+        this.playTone(880, 'sine', 0.05, 0);
+        this.playTone(1174.66, 'sine', 0.06, 0.04);
       },
       playAllClear() {
         this.init();
@@ -893,7 +896,6 @@
       }
     }
 
-    // デフォルトアバター
     const defaultAvatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="%23ffffff"/><rect x="4" y="3" width="8" height="9" fill="%23ffffff"/><rect x="3" y="5" width="10" height="6" fill="%23ffffff"/><rect x="5" y="6" width="1" height="2" fill="%233d4f58"/><rect x="10" y="6" width="1" height="2" fill="%233d4f58"/><rect x="7" y="8" width="2" height="1" fill="%233d4f58"/><rect x="4" y="8" width="1" height="1" fill="%23f472b6"/><rect x="11" y="8" width="1" height="1" fill="%23f472b6"/><rect x="2" y="9" width="2" height="2" fill="%23cbd5e1"/><rect x="12" y="9" width="2" height="2" fill="%23cbd5e1"/></svg>`;
 
     let userAvatar = localStorage.getItem("todoAppAvatar") || defaultAvatarSvg;
@@ -919,7 +921,6 @@
       reader.readAsDataURL(file);
     }
 
-    /* キャラのフキダシ・リアクション機能 */
     let bubbleTimer = null;
     function triggerCharacterReaction() {
       const bubble = document.getElementById("speech-bubble");
@@ -975,7 +976,6 @@
       }, 3000);
     }
 
-    /* キャラボタンのタップ/長押し判定 */
     const charBtn = document.getElementById("char-btn");
     let charLongPressTimer = null;
     let isLongPress = false;
@@ -1030,7 +1030,6 @@
     let currentCategory = categories[0] || "";
     let wasAllCompleted = false;
 
-    /* Auto Reset Logic */
     let autoResetTime = localStorage.getItem("todoAutoResetTime") || "04:00";
     let lastResetDate = localStorage.getItem("todoLastResetDate") || "";
 
@@ -1060,7 +1059,6 @@
       }
     }
 
-    /* Notification Logic */
     let notifyConfig = JSON.parse(localStorage.getItem("todoNotifyConfig")) || {
       enabled: false,
       time: "20:00",
@@ -1202,7 +1200,6 @@
         currentCategory = categories[0];
       }
 
-      // Render Tabs
       const tabsContainer = document.getElementById("tabs-container");
       tabsContainer.innerHTML = "";
       categories.forEach(cat => {
@@ -1217,7 +1214,6 @@
         tabsContainer.appendChild(btn);
       });
 
-      // Render Items
       const listContainer = document.getElementById("item-list");
       const completedContainer = document.getElementById("completed-items-container");
       const completedSection = document.getElementById("completed-section");
@@ -1322,7 +1318,6 @@
         streakText.textContent = `${updatedCatStreak} DAYS`;
         streakBadge.classList.remove("zero");
 
-        // 星をピクセルバウンド
         streakBadge.classList.remove("pixel-pop");
         void streakBadge.offsetWidth;
         streakBadge.classList.add("pixel-pop");
