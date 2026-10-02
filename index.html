@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
+  <title>ToDo - Town Edition</title>
+
+  <!-- PWA Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ToDo">
+
+  <!-- ホーム画面アイコン：アザラシ（🦭） -->
+  <link rel="apple-touch-icon" href="https://fav.farm/🦭">
+
+  <!-- Google Fonts: 高視認性モダンフォント + 読みやすいドットフォント (DotGothic16) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* GBA/DS ポケモン風パレット */
+      --window-bg: #f8faf8;
+      --pixel-line: #3b505c;
+      --pixel-shadow: #28373f;
+      --task-line: #425866;
+      --pixel-text: #223038;
+      --pixel-gray: #889ba6;
+      --pixel-dark-gray: #4b606d;
+      --accent-orange: #d94b26;
+      --btn-green: #3ea055;
+      --line-border: 2px solid var(--pixel-line);
+
+      /* フォント定義 */
+      --font-modern: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+      --font-dot: 'DotGothic16', monospace, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      image-rendering: pixelated;
+    }
+
+    body {
+      font-family: var(--font-dot);
+      margin: 0;
+      padding: 16px 10px;
+      color: var(--pixel-text);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      letter-spacing: 0.02em;
+
+      /* ポケモン（マサラタウン風）ドット絵マップ背景 */
+      background-color: #a0d8b0;
+      background-image: url('image_2f3af1.jpg');
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    /* 液晶風の走査線/微細ドットフィルター */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      background: linear-gradient(rgba(0, 0, 0, 0.03) 50%, rgba(255, 255, 255, 0.03) 50%);
+      background-size: 100% 4px;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 99999;
+    }
+
+    /* GBA/DS 会話ウィンドウ風コンテナ */
+    .app-container {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(2px);
+      border: 3px solid var(--pixel-line);
+      box-shadow: 0 0 0 2px #f8faf8, 4px 5px 0px 2px var(--pixel-shadow);
+      padding: 12px 12px 16px 12px;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 24px;
+      border-radius: 2px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: var(--line-border);
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h1 {
+      font-family: var(--font-dot);
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--pixel-text);
+      line-height: 1;
+      letter-spacing: 0.04em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .icon-action-btn {
+      background: #eef4f8;
+      border: var(--line-border);
+      box-shadow: 2px 2px 0px var(--pixel-shadow);
+      cursor: pointer;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--pixel-text);
+      min-width: 28px;
+      height: 28px;
+    }
+    .icon-action-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+    .icon-action-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px var(--pixel-shadow);
+    }
+
+    .char-avatar-btn {
+      background: #fff;
+      border: var(--line-border);
+      box-shadow: 2px 2px 0px var(--pixel-shadow);
+      padding: 1px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .char-avatar-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px var(--pixel-shadow);
+    }
+
+    .char-img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+
+    .del-category-btn {
+      background: #fff;
+      border: var(--line-border);
+      box-shadow: 2px 2px 0px var(--pixel-shadow);
+      color: #b91c1c;
+      font-family: var(--font-dot);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 3px 6px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+    }
+    .del-category-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px var(--pixel-shadow);
+    }
+
+    /* Tabs */
+    .tabs-wrapper {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      margin-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .tabs-wrapper::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      padding: 5px 12px;
+      background: #eef4f8;
+      border: var(--line-border);
+      box-shadow: 2px 2px 0px var(--pixel-shadow);
+      font-family: var(--font-modern);
+      font-size: 0.84rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--pixel-dark-gray);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-orange);
+      color: #ffffff;
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px var(--pixel-shadow);
+    }
+
+    .add-tab-btn {
+      padding: 5px 8px;
+      background: #ffffff;
+      border: 2px dashed #94a3b8;
+      font-family: var(--font-modern);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--pixel-dark-gray);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .add-tab-btn:active {
+      background: #f8fafc;
+      border-color: var(--pixel-line);
+    }
+
+    /* Status Panel */
+    .status-panel {
+      background: #f0f7f4;
+      border: var(--line-border);
+      padding: 8px 10px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+    }
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .streak-badge {
+      font-family: var(--font-dot);
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--accent-orange);
+      background: #fff;
+      padding: 2px 6px;
+      border: 1px solid var(--pixel-line);
+      letter-spacing: 0.05em;
+    }
+    .streak-badge.zero {
+      color: var(--pixel-gray);
+      border-color: #cbd5e1;
+    }
+    .progress-text {
+      font-family: var(--font-dot);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--pixel-dark-gray);
+      letter-spacing: 0.03em;
+    }
+    .progress-bar-track {
+      width: 100%;
+      height: 7px;
+      background: #d8e5db;
+      border: 1px solid var(--pixel-line);
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--btn-green);
+      transition: width 0.2s steps(8, end);
+    }
+
+    /* 追加フォーム */
+    .add-form {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .add-input {
+      flex: 1;
+      padding: 6px 10px;
+      border: var(--line-border);
+      background: #ffffff;
+      font-family: var(--font-dot);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--pixel-text);
+      outline: none;
+    }
+    .add-input::placeholder {
+      font-family: var(--font-dot);
+      color: #94a3b8;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .add-input:focus {
+      background: #fffbeb;
+      border-color: var(--accent-orange);
+    }
+
+    .add-btn {
+      width: 33px;
+      height: 33px;
+      padding: 0;
+      background: var(--btn-green);
+      color: #ffffff;
+      border: var(--line-border);
+      box-shadow: 2px 2px 0px var(--pixel-shadow);
+      font-family: var(--font-dot);
+      font-weight: 700;
+      font-size: 1.25rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .add-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px var(--pixel-shadow);
+    }
+
+    /* Item List */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      padding: 7px 8px;
+      background: #ffffff;
+      border: 2px solid var(--task-line);
+      box-shadow: 2px 2px 0px rgba(59, 80, 92, 0.15);
+      user-select: none;
+    }
+
+    .item-row.dragging {
+      opacity: 0.45;
+      background: #fffbeb;
+      border-style: dashed;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      color: #94a3b8;
+      padding: 0 4px 0 0;
+      display: flex;
+      align-items: center;
+      font-size: 0.95rem;
+      touch-action: none;
+    }
+
+    .item-row.checked {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      box-shadow: none;
+      opacity: 0.65;
+    }
+
+    .item-text {
+      flex: 1;
+      font-family: var(--font-modern);
+      font-size: 0.94rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+    }
+
+    .item-row.checked .item-text {
+      text-decoration: line-through;
+      color: var(--pixel-gray);
+    }
+
+    .item-content {
+      display: flex;
+      align-items: center;
+      flex-grow: 1;
+      cursor: pointer;
+      margin-left: 2px;
+      min-width: 0;
+    }
+
+    .inline-edit-input {
+      flex: 1;
+      font-family: var(--font-modern);
+      font-size: 0.94rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      padding: 2px 4px;
+      border: 2px solid var(--accent-orange);
+      outline: none;
+      background: #ffffff;
+    }
+
+    .checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 17px;
+      height: 17px;
+      border: 2px solid var(--pixel-line);
+      margin-right: 8px;
+      background: #ffffff;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+      flex-shrink: 0;
+    }
+    .checkbox:checked {
+      background: var(--accent-orange);
+      border-color: var(--accent-orange);
+    }
+    .checkbox:checked::after {
+      content: "■";
+      font-size: 9px;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .del-item-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-family: var(--font-dot);
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 2px 4px;
+      line-height: 1;
+    }
+    .del-item-btn:hover { color: #dc2626; }
+
+    /* Completed Accordion */
+    .completed-section {
+      margin-top: 8px;
+      margin-bottom: 6px;
+    }
+    .completed-toggle-btn {
+      width: 100%;
+      background: #f0f7f4;
+      border: 1px solid #cbd5e1;
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--pixel-dark-gray);
+      font-family: var(--font-dot);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+    }
+    .completed-items-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .completed-section:not(.open) .completed-items-container {
+      display: none;
+    }
+
+    .empty-hint {
+      text-align: center;
+      color: var(--pixel-dark-gray);
+      font-family: var(--font-dot);
+      font-size: 0.9rem;
+      padding: 16px 0;
+      letter-spacing: 0.03em;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-card {
+      background: #ffffff;
+      border: 3px solid var(--pixel-line);
+      box-shadow: 4px 4px 0px var(--pixel-shadow);
+      padding: 16px;
+      width: 100%;
+      max-width: 310px;
+      font-family: var(--font-dot);
+    }
+    .modal-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      border-bottom: var(--line-border);
+      padding-bottom: 4px;
+      letter-spacing: 0.05em;
+    }
+    .modal-card p {
+      font-size: 0.88rem;
+      color: var(--pixel-dark-gray);
+      margin: 0 0 12px 0;
+      line-height: 1.45;
+    }
+    .time-input-group {
+      display: flex;
+      margin-bottom: 14px;
+    }
+    .time-input-group input[type="time"] {
+      width: 100%;
+      padding: 6px 8px;
+      border: var(--line-border);
+      font-family: var(--font-modern);
+      font-size: 1rem;
+      font-weight: 700;
+      outline: none;
+      color: var(--pixel-text);
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .modal-btn {
+      padding: 5px 12px;
+      font-family: var(--font-dot);
+      font-weight: 700;
+      font-size: 0.88rem;
+      border: var(--line-border);
+      box-shadow: 2px 2px 0px var(--pixel-shadow);
+      cursor: pointer;
+    }
+    .modal-btn.primary {
+      background: var(--accent-orange);
+      color: white;
+    }
+    .modal-btn.secondary {
+      background: #f1f5f9;
+      color: var(--pixel-text);
+    }
+    .modal-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px var(--pixel-shadow);
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-container">
+    <div class="header">
+      <div class="title-group">
+        <h1>ToDo</h1>
+        <button class="char-avatar-btn" onclick="openImagePicker()" title="Change character">
+          <img id="char-img" class="char-img" src="" alt="Character">
+        </button>
+        <input type="file" id="char-file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+      </div>
+      <div class="header-actions">
+        <!-- GB風サウンド切替ボタン -->
+        <button id="sound-toggle-btn" class="icon-action-btn" onclick="toggleSound()" title="Toggle Sound"></button>
+        <!-- GB風リマインダー通知設定ボタン（ピクセルベル） -->
+        <button class="icon-action-btn" onclick="openNotifModal()" title="Reminder Notification">
+          <svg viewBox="0 0 16 16" fill="currentColor">
+            <rect x="7" y="1" width="2" height="2"/>
+            <rect x="6" y="3" width="4" height="2"/>
+            <rect x="5" y="5" width="6" height="5"/>
+            <rect x="2" y="10" width="12" height="2"/>
+            <rect x="7" y="13" width="2" height="2"/>
+          </svg>
+        </button>
+        <!-- GB風オートリセット設定時計ボタン（ピクセルクロック） -->
+        <button class="icon-action-btn" onclick="openResetModal()" title="Auto-reset settings">
+          <svg viewBox="0 0 16 16" fill="currentColor">
+            <rect x="5" y="1" width="6" height="1"/>
+            <rect x="3" y="2" width="2" height="1"/><rect x="11" y="2" width="2" height="1"/>
+            <rect x="2" y="3" width="1" height="2"/><rect x="13" y="3" width="1" height="2"/>
+            <rect x="1" y="5" width="1" height="6"/><rect x="14" y="5" width="1" height="6"/>
+            <rect x="2" y="11" width="1" height="2"/><rect x="13" y="11" width="1" height="2"/>
+            <rect x="3" y="13" width="2" height="1"/><rect x="11" y="13" width="2" height="1"/>
+            <rect x="5" y="14" width="6" height="1"/>
+            <rect x="7" y="4" width="2" height="5"/>
+            <rect x="8" y="7" width="4" height="2"/>
+          </svg>
+        </button>
+        <button class="del-category-btn" onclick="deleteCurrentCategory()">DEL TAB</button>
+      </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="tabs-wrapper">
+      <div id="tabs-container" style="display: flex; gap: 6px;"></div>
+      <button class="add-tab-btn" onclick="addNewCategory()">+ NEW</button>
+    </div>
+
+    <!-- Status Panel -->
+    <div class="status-panel">
+      <div class="status-header">
+        <div id="streak-display" class="streak-badge">★ 0 DAYS</div>
+        <span id="progress-text" class="progress-text">0 / 0 CLEAR</span>
+      </div>
+      <div class="progress-bar-track">
+        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+      </div>
+    </div>
+
+    <!-- 追加フォーム -->
+    <form class="add-form" onsubmit="addItem(event)">
+      <input type="text" id="new-item-input" class="add-input" placeholder="New task..." required>
+      <button type="submit" class="add-btn" title="Add item">+</button>
+    </form>
+
+    <!-- Active Items List -->
+    <div class="item-list" id="item-list"></div>
+
+    <!-- Completed Items Accordion -->
+    <div class="completed-section open" id="completed-section" style="display: none;">
+      <button class="completed-toggle-btn" onclick="toggleCompletedSection()">
+        <span id="completed-title-count">CLEARED (0)</span>
+        <span class="toggle-arrow">▼</span>
+      </button>
+      <div class="completed-items-container" id="completed-items-container"></div>
+    </div>
+  </div>
+
+  <!-- Auto Reset Settings Modal -->
+  <div class="modal-backdrop" id="reset-modal">
+    <div class="modal-card">
+      <h3>AUTO-RESET</h3>
+      <p>Set daily auto-reset time for completed items.</p>
+      <div class="time-input-group">
+        <input type="time" id="reset-time-input" value="04:00">
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeResetModal()">CANCEL</button>
+        <button class="modal-btn primary" onclick="saveResetSettings()">SET</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reminder Notification Settings Modal -->
+  <div class="modal-backdrop" id="notif-modal">
+    <div class="modal-card">
+      <h3>REMINDER</h3>
+      <p>Set a daily reminder alert for pending tasks.</p>
+      <div class="time-input-group">
+        <input type="time" id="notif-time-input" value="20:00">
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeNotifModal()">CANCEL</button>
+        <button class="modal-btn primary" onclick="saveNotifSettings()">ENABLE</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* Haptics & Sound Engine (Web Audio API) */
+    function triggerHaptic(pattern = 15) {
+      if ("vibrate" in navigator) {
+        try { navigator.vibrate(pattern); } catch (e) {}
+      }
+    }
+
+    let soundEnabled = localStorage.getItem("todoSoundEnabled") !== "false";
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    /* GB風 ピクセルSVGアイコン群 */
+    const gbSoundOnSvg = `
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <rect x="2" y="6" width="3" height="4"/>
+        <rect x="5" y="4" width="2" height="8"/>
+        <rect x="7" y="2" width="2" height="12"/>
+        <rect x="11" y="4" width="1" height="2"/>
+        <rect x="12" y="6" width="1" height="4"/>
+        <rect x="11" y="10" width="1" height="2"/>
+        <rect x="14" y="2" width="1" height="2"/>
+        <rect x="15" y="4" width="1" height="8"/>
+        <rect x="14" y="12" width="1" height="2"/>
+      </svg>
+    `;
+
+    const gbSoundOffSvg = `
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <rect x="1" y="6" width="3" height="4"/>
+        <rect x="4" y="4" width="2" height="8"/>
+        <rect x="6" y="2" width="2" height="12"/>
+        <rect x="10" y="5" width="2" height="2"/>
+        <rect x="14" y="5" width="2" height="2"/>
+        <rect x="12" y="7" width="2" height="2"/>
+        <rect x="10" y="9" width="2" height="2"/>
+        <rect x="14" y="9" width="2" height="2"/>
+      </svg>
+    `;
+
+    function updateSoundBtn() {
+      const btn = document.getElementById("sound-toggle-btn");
+      if (btn) {
+        btn.innerHTML = soundEnabled ? gbSoundOnSvg : gbSoundOffSvg;
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem("todoSoundEnabled", soundEnabled);
+      updateSoundBtn();
+      if (soundEnabled) playSound("check");
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      const ctx = getAudioContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+
+      if (type === "check") {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(987.77, now);
+        osc.frequency.setValueAtTime(1318.51, now + 0.08);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === "uncheck") {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(220, now + 0.12);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.13);
+      } else if (type === "add") {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(659.25, now);
+        gain.gain.setValueAtTime(0.07, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.11);
+      } else if (type === "fanfare") {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const startTime = now + idx * 0.09;
+          osc.type = "square";
+          osc.frequency.setValueAtTime(freq, startTime);
+          gain.gain.setValueAtTime(0.09, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.22);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.24);
+        });
+      }
+    }
+
+    const defaultAvatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="%23cbd5e1"/><rect x="4" y="3" width="8" height="9" fill="%23ffffff"/><rect x="3" y="5" width="10" height="6" fill="%23ffffff"/><rect x="5" y="6" width="1" height="2" fill="%233d4f58"/><rect x="10" y="6" width="1" height="2" fill="%233d4f58"/><rect x="7" y="8" width="2" height="1" fill="%233d4f58"/><rect x="4" y="8" width="1" height="1" fill="%23f472b6"/><rect x="11" y="8" width="1" height="1" fill="%23f472b6"/><rect x="2" y="9" width="2" height="2" fill="%23e2e8f0"/><rect x="12" y="9" width="2" height="2" fill="%23e2e8f0"/></svg>`;
+
+    let userAvatar = localStorage.getItem("todoAppAvatar") || defaultAvatarSvg;
+    document.getElementById("char-img").src = userAvatar;
+
+    function openImagePicker() {
+      const choice = confirm("Change character sprite?");
+      if (choice) {
+        document.getElementById("char-file-input").click();
+      }
+    }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        userAvatar = e.target.result;
+        document.getElementById("char-img").src = userAvatar;
+        localStorage.setItem("todoAppAvatar", userAvatar);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    const defaultData = {
+      "General": [
+        { text: "Keys & Passcode", checked: false },
+        { text: "Phone & Transit Card", checked: false },
+        { text: "Wallet", checked: false },
+        { text: "Lock Doors & Windows", checked: false }
+      ],
+      "Travel": [
+        { text: "Power Bank", checked: false },
+        { text: "Earphones", checked: false },
+        { text: "Umbrella", checked: false }
+      ]
+    };
+
+    let data = JSON.parse(localStorage.getItem("routineAppDataEn")) || defaultData;
+    let categoryStreaks = JSON.parse(localStorage.getItem("todoCategoryStreaks")) || {};
+    let categories = Object.keys(data);
+    let currentCategory = categories[0] || "";
+    let wasAllCompleted = false;
+
+    /* Auto Reset Logic */
+    let autoResetTime = localStorage.getItem("todoAutoResetTime") || "04:00";
+    let lastResetDate = localStorage.getItem("todoLastResetDate") || "";
+
+    function getLogicalDateString() {
+      const now = new Date();
+      const [rHour, rMin] = autoResetTime.split(":").map(Number);
+      const threshold = new Date(now.getFullYear(), now.getMonth(), now.getDate(), rHour, rMin, 0, 0);
+      if (now >= threshold) {
+        return threshold.toISOString().slice(0, 10);
+      } else {
+        const yesterday = new Date(threshold.getTime() - 24 * 60 * 60 * 1000);
+        return yesterday.toISOString().slice(0, 10);
+      }
+    }
+
+    function checkDailyAutoReset() {
+      const targetResetDate = getLogicalDateString();
+
+      if (lastResetDate !== targetResetDate) {
+        Object.keys(data).forEach(cat => {
+          data[cat] = data[cat].map(item => ({ ...item, checked: false }));
+        });
+        lastResetDate = targetResetDate;
+        localStorage.setItem("todoLastResetDate", lastResetDate);
+        saveData();
+        render();
+      }
+    }
+
+    /* Notification Logic */
+    let notifTime = localStorage.getItem("todoNotifTime") || "";
+    let lastNotifDate = localStorage.getItem("todoLastNotifDate") || "";
+
+    function openNotifModal() {
+      document.getElementById("notif-time-input").value = notifTime || "20:00";
+      document.getElementById("notif-modal").classList.add("open");
+    }
+    function closeNotifModal() {
+      document.getElementById("notif-modal").classList.remove("open");
+    }
+
+    async function saveNotifSettings() {
+      if (!("Notification" in window)) {
+        alert("This browser does not support notifications.");
+        closeNotifModal();
+        return;
+      }
+
+      let permission = Notification.permission;
+      if (permission !== "granted") {
+        permission = await Notification.requestPermission();
+      }
+
+      if (permission === "granted") {
+        notifTime = document.getElementById("notif-time-input").value;
+        localStorage.setItem("todoNotifTime", notifTime);
+        new Notification("ToDo Notification Active", {
+          body: `Daily reminder set for ${notifTime}.`
+        });
+      } else {
+        alert("Notification permission was denied.");
+      }
+      closeNotifModal();
+    }
+
+    function checkDailyReminder() {
+      if (!notifTime || !("Notification" in window) || Notification.permission !== "granted") return;
+
+      const now = new Date();
+      const currentHm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const todayStr = now.toISOString().slice(0, 10);
+
+      if (currentHm === notifTime && lastNotifDate !== todayStr) {
+        let pendingCount = 0;
+        Object.keys(data).forEach(cat => {
+          pendingCount += data[cat].filter(item => !item.checked).length;
+        });
+
+        if (pendingCount > 0) {
+          new Notification("ToDo Reminder", {
+            body: `You still have ${pendingCount} pending task${pendingCount > 1 ? "s" : ""} today!`
+          });
+        }
+        lastNotifDate = todayStr;
+        localStorage.setItem("todoLastNotifDate", lastNotifDate);
+      }
+    }
+
+    function updateStreakOnAllCompleted(categoryName) {
+      if (!categoryStreaks[categoryName]) {
+        categoryStreaks[categoryName] = { current: 0, lastCompletedDate: "" };
+      }
+
+      const streakData = categoryStreaks[categoryName];
+      const todayStr = getLogicalDateString();
+
+      if (streakData.lastCompletedDate === todayStr) {
+        return;
+      }
+
+      const today = new Date(todayStr);
+      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+      const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+      if (streakData.lastCompletedDate === yesterdayStr) {
+        streakData.current += 1;
+      } else {
+        streakData.current = 1;
+      }
+
+      streakData.lastCompletedDate = todayStr;
+      localStorage.setItem("todoCategoryStreaks", JSON.stringify(categoryStreaks));
+    }
+
+    function openResetModal() {
+      document.getElementById("reset-time-input").value = autoResetTime;
+      document.getElementById("reset-modal").classList.add("open");
+    }
+    function closeResetModal() {
+      document.getElementById("reset-modal").classList.remove("open");
+    }
+    function saveResetSettings() {
+      const val = document.getElementById("reset-time-input").value;
+      if (val) {
+        autoResetTime = val;
+        localStorage.setItem("todoAutoResetTime", autoResetTime);
+        lastResetDate = "";
+        checkDailyAutoReset();
+      }
+      closeResetModal();
+    }
+
+    function saveData() {
+      localStorage.setItem("routineAppDataEn", JSON.stringify(data));
+      localStorage.setItem("todoCategoryStreaks", JSON.stringify(categoryStreaks));
+    }
+
+    function toggleCompletedSection() {
+      const sec = document.getElementById("completed-section");
+      sec.classList.toggle("open");
+    }
+
+    function render() {
+      categories = Object.keys(data);
+
+      if (categories.length === 0) {
+        data["General"] = [];
+        categories = ["General"];
+        currentCategory = "General";
+      }
+
+      if (!categories.includes(currentCategory)) {
+        currentCategory = categories[0];
+      }
+
+      // Tabs
+      const tabsContainer = document.getElementById("tabs-container");
+      tabsContainer.innerHTML = "";
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = `tab-btn ${cat === currentCategory ? "active" : ""}`;
+        btn.textContent = cat;
+        btn.onclick = () => {
+          currentCategory = cat;
+          wasAllCompleted = false;
+          render();
+        };
+        tabsContainer.appendChild(btn);
+      });
+
+      // Items
+      const listContainer = document.getElementById("item-list");
+      const completedContainer = document.getElementById("completed-items-container");
+      const completedSection = document.getElementById("completed-section");
+      
+      listContainer.innerHTML = "";
+      completedContainer.innerHTML = "";
+      
+      const currentItems = data[currentCategory] || [];
+      const totalCount = currentItems.length;
+      let completedCount = 0;
+
+      currentItems.forEach((item, index) => {
+        if (item.checked) completedCount++;
+
+        const row = document.createElement("div");
+        row.className = `item-row ${item.checked ? "checked" : ""}`;
+        row.dataset.index = index;
+
+        const handleHtml = item.checked ? "" : `<div class="drag-handle">::</div>`;
+        
+        row.innerHTML = `
+          ${handleHtml}
+          <div class="item-content">
+            <input type="checkbox" class="checkbox" ${item.checked ? "checked" : ""}>
+            <span class="item-text">${escapeHtml(item.text)}</span>
+          </div>
+          <button class="del-item-btn" title="Delete">×</button>
+        `;
+
+        const contentDiv = row.querySelector(".item-content");
+        const textSpan = row.querySelector(".item-text");
+
+        contentDiv.addEventListener("click", (e) => {
+          if (e.target.tagName === 'INPUT' && e.target.classList.contains('inline-edit-input')) return;
+          toggleCheck(index);
+        });
+
+        let pressTimer = null;
+        textSpan.addEventListener("dblclick", (e) => {
+          e.stopPropagation();
+          startInlineEdit(index, textSpan, contentDiv);
+        });
+
+        textSpan.addEventListener("touchstart", (e) => {
+          pressTimer = setTimeout(() => {
+            e.stopPropagation();
+            startInlineEdit(index, textSpan, contentDiv);
+          }, 600);
+        }, { passive: true });
+
+        textSpan.addEventListener("touchend", () => clearTimeout(pressTimer));
+        textSpan.addEventListener("touchmove", () => clearTimeout(pressTimer));
+
+        row.querySelector(".del-item-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          deleteItem(index);
+        });
+
+        if (!item.checked) {
+          setupRowDragAndTouch(row);
+          listContainer.appendChild(row);
+        } else {
+          completedContainer.appendChild(row);
+        }
+      });
+
+      if (totalCount === 0) {
+        listContainer.innerHTML = `<div class="empty-hint">No tasks found. Add one above.</div>`;
+      } else if (completedCount === totalCount) {
+        listContainer.innerHTML = `<div class="empty-hint" style="color: var(--accent-orange); font-weight: 700;">★ ALL CLEARED! ★</div>`;
+      }
+
+      if (completedCount > 0) {
+        completedSection.style.display = "block";
+        document.getElementById("completed-title-count").textContent = `CLEARED (${completedCount})`;
+      } else {
+        completedSection.style.display = "none";
+      }
+
+      const allChecked = totalCount > 0 && completedCount === totalCount;
+
+      const progressPercent = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+      const fillBar = document.getElementById("progress-bar-fill");
+      fillBar.style.width = `${progressPercent}%`;
+
+      document.getElementById("progress-text").textContent = `${completedCount} / ${totalCount} (${progressPercent}%)`;
+
+      const catStreak = categoryStreaks[currentCategory] ? categoryStreaks[currentCategory].current : 0;
+      const streakBadge = document.getElementById("streak-display");
+      streakBadge.textContent = `★ ${catStreak} DAYS`;
+      streakBadge.classList.toggle("zero", catStreak === 0);
+
+      if (allChecked && !wasAllCompleted) {
+        triggerPixelCrackers();
+        playSound("fanfare");
+        triggerHaptic([40, 60, 40]);
+        updateStreakOnAllCompleted(currentCategory);
+        const updatedCatStreak = categoryStreaks[currentCategory].current;
+        streakBadge.textContent = `★ ${updatedCatStreak} DAYS`;
+        streakBadge.classList.remove("zero");
+      }
+      wasAllCompleted = allChecked;
+
+      saveData();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function startInlineEdit(index, textSpan, container) {
+      triggerHaptic(20);
+      const currentText = data[currentCategory][index].text;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "inline-edit-input";
+      input.value = currentText;
+
+      const finalizeEdit = () => {
+        const val = input.value.trim();
+        if (val && val !== currentText) {
+          data[currentCategory][index].text = val;
+          saveData();
+        }
+        render();
+      };
+
+      input.addEventListener("blur", finalizeEdit);
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          input.blur();
+        } else if (e.key === "Escape") {
+          input.value = currentText;
+          input.blur();
+        }
+      });
+
+      container.replaceChild(input, textSpan);
+      input.focus();
+      input.select();
+    }
+
+    function toggleCheck(index) {
+      const willBeChecked = !data[currentCategory][index].checked;
+      triggerHaptic(20);
+      playSound(willBeChecked ? "check" : "uncheck");
+      data[currentCategory][index].checked = willBeChecked;
+      render();
+    }
+
+    function addItem(e) {
+      e.preventDefault();
+      const input = document.getElementById("new-item-input");
+      const val = input.value.trim();
+      if (!val) return;
+
+      triggerHaptic(20);
+      playSound("add");
+      if (!data[currentCategory]) data[currentCategory] = [];
+      data[currentCategory].push({ text: val, checked: false });
+      input.value = "";
+      wasAllCompleted = false;
+      render();
+    }
+
+    function deleteItem(index) {
+      triggerHaptic(25);
+      playSound("uncheck");
+      data[currentCategory].splice(index, 1);
+      render();
+    }
+
+    function addNewCategory() {
+      const name = prompt("Enter tab name:");
+      if (!name) return;
+      const cleanName = name.trim();
+      if (!cleanName) return;
+
+      if (data[cleanName]) {
+        alert("Tab already exists.");
+        currentCategory = cleanName;
+      } else {
+        data[cleanName] = [];
+        currentCategory = cleanName;
+      }
+      wasAllCompleted = false;
+      render();
+    }
+
+    function deleteCurrentCategory() {
+      if (categories.length <= 1) {
+        alert("Cannot delete the last remaining tab.");
+        return;
+      }
+      const confirmDelete = confirm(`Delete "${currentCategory}"?`);
+      if (confirmDelete) {
+        delete data[currentCategory];
+        delete categoryStreaks[currentCategory];
+        currentCategory = Object.keys(data)[0];
+        wasAllCompleted = false;
+        render();
+      }
+    }
+
+    /* Drag & Drop */
+    let draggedRow = null;
+
+    function setupRowDragAndTouch(row) {
+      const handle = row.querySelector(".drag-handle");
+      if (!handle) return;
+
+      row.setAttribute("draggable", "true");
+      row.addEventListener("dragstart", (e) => {
+        draggedRow = row;
+        row.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+      });
+      row.addEventListener("dragend", () => {
+        if (draggedRow) draggedRow.classList.remove("dragging");
+        draggedRow = null;
+      });
+
+      handle.addEventListener("touchstart", (e) => {
+        draggedRow = row;
+        row.classList.add("dragging");
+        triggerHaptic(20);
+      }, { passive: true });
+
+      handle.addEventListener("touchmove", (e) => {
+        if (!draggedRow) return;
+        const touchY = e.touches[0].clientY;
+        const targetElement = document.elementFromPoint(e.touches[0].clientX, touchY);
+        const targetRow = targetElement ? targetElement.closest("#item-list .item-row") : null;
+
+        if (targetRow && targetRow !== draggedRow) {
+          const list = document.getElementById("item-list");
+          const rect = targetRow.getBoundingClientRect();
+          const next = (touchY - rect.top) / (rect.bottom - rect.top) > 0.5;
+          list.insertBefore(draggedRow, next ? targetRow.nextSibling : targetRow);
+        }
+      }, { passive: true });
+
+      handle.addEventListener("touchend", () => {
+        if (draggedRow) {
+          draggedRow.classList.remove("dragging");
+          finalizeReorder();
+          draggedRow = null;
+        }
+      });
+    }
+
+    const listElement = document.getElementById("item-list");
+    listElement.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      if (!draggedRow) return;
+      const afterElement = getDragAfterElement(listElement, e.clientY);
+      if (afterElement == null) {
+        listElement.appendChild(draggedRow);
+      } else {
+        listElement.insertBefore(draggedRow, afterElement);
+      }
+    });
+
+    listElement.addEventListener("drop", (e) => {
+      e.preventDefault();
+      finalizeReorder();
+    });
+
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll(".item-row:not(.dragging)")];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function finalizeReorder() {
+      triggerHaptic(20);
+      const activeRows = [...document.querySelectorAll("#item-list .item-row")];
+      const completedRows = [...document.querySelectorAll("#completed-items-container .item-row")];
+      
+      const newItems = [];
+      const currentItems = data[currentCategory] || [];
+      
+      activeRows.forEach(r => {
+        const idx = parseInt(r.dataset.index, 10);
+        if (!isNaN(idx) && currentItems[idx]) {
+          newItems.push(currentItems[idx]);
+        }
+      });
+      
+      completedRows.forEach(r => {
+        const idx = parseInt(r.dataset.index, 10);
+        if (!isNaN(idx) && currentItems[idx]) {
+          newItems.push(currentItems[idx]);
+        }
+      });
+
+      data[currentCategory] = newItems;
+      render();
+    }
+
+    /* Pixel Confetti Engine */
+    const canvas = document.getElementById("confetti-canvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    let animationFrameId = null;
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.imageSmoothingEnabled = false;
+    }
+    window.addEventListener("resize", () => {
+      if (particles.length === 0) resizeCanvas();
+    });
+    resizeCanvas();
+
+    function createPixelParticle(x, y, angleBase, baseSpeed) {
+      const colors = ["#d94b26", "#ffd166", "#3ea055", "#4290f5", "#ffffff", "#223038"];
+      const angle = angleBase + (Math.random() - 0.5) * 0.7;
+      const speed = Math.random() * (baseSpeed * 0.5) + baseSpeed;
+
+      return {
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        gravity: 0.28,
+        drag: 0.97,
+        size: Math.floor(Math.random() * 3 + 6),
+        color: colors[Math.floor(Math.random() * colors.length)],
+        opacity: 1
+      };
+    }
+
+    function triggerPixelCrackers() {
+      resizeCanvas();
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const cornerCount = 45;
+
+      for (let i = 0; i < cornerCount; i++) {
+        particles.push(createPixelParticle(0, h * 0.9, -Math.PI / 4, 12));
+        particles.push(createPixelParticle(w, h * 0.9, -Math.PI * 0.75, 12));
+        particles.push(createPixelParticle(0, h * 0.1, Math.PI / 4, 10));
+        particles.push(createPixelParticle(w, h * 0.1, Math.PI * 0.75, 10));
+      }
+
+      if (!animationFrameId) {
+        updatePixelConfetti();
+      }
+    }
+
+    function updatePixelConfetti() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+
+        p.vy += p.gravity;
+        p.vx *= p.drag;
+        p.vy *= p.drag;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.y > h * 0.65) {
+          p.opacity -= 0.02;
+        }
+
+        if (p.opacity <= 0 || p.y > h + 30) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
+      }
+      ctx.globalAlpha = 1.0;
+
+      if (particles.length > 0) {
+        animationFrameId = requestAnimationFrame(updatePixelConfetti);
+      } else {
+        ctx.clearRect(0, 0, w, h);
+        animationFrameId = null;
+      }
+    }
+
+    setInterval(() => {
+      checkDailyAutoReset();
+      checkDailyReminder();
+    }, 30000);
+
+    window.addEventListener("focus", () => {
+      checkDailyAutoReset();
+      checkDailyReminder();
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        checkDailyAutoReset();
+        checkDailyReminder();
+      }
+    });
+
+    updateSoundBtn();
+    checkDailyAutoReset();
+    checkDailyReminder();
+    render();
+  </script>
+</body>
+</html>
