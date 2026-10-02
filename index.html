@@ -46,19 +46,18 @@
     body {
       font-family: var(--font-dot);
       margin: 0;
-      /* スマホのノッチやホームバーを考慮したセーフエリアパディング */
       padding: max(16px, env(safe-area-inset-top)) 10px max(24px, env(safe-area-inset-bottom)) 10px;
       color: var(--pixel-text);
       display: flex;
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
-      min-height: 100dvh; /* スマホブラウザのアドレスバー変動対応 */
+      min-height: 100dvh;
       overflow-x: hidden;
       position: relative;
       letter-spacing: 0.02em;
 
-      /* ポケモン（マサラタウン風）ドット絵マップ背景：スマホ縦画面にフィット */
+      /* ポケモン（マサラタウン風）ドット絵マップ背景 */
       background-color: #a0d8b0;
       background-image: url('image_2f3af1.jpg');
       background-size: cover;
@@ -119,7 +118,7 @@
     .title-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     h1 {
@@ -161,23 +160,21 @@
       box-shadow: 0px 0px 0px var(--pixel-shadow);
     }
 
-    /* キャラクターアイコン枠（背景を純白に固定） */
+    /* キャラクターアイコン枠なし */
     .char-avatar-btn {
-      background: #ffffff !important;
-      border: var(--line-border);
-      box-shadow: 2px 2px 0px var(--pixel-shadow);
-      padding: 1px;
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 30px;
-      height: 30px;
-      overflow: hidden;
+      width: 32px;
+      height: 32px;
     }
     .char-avatar-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: 0px 0px 0px var(--pixel-shadow);
+      transform: scale(0.92);
     }
 
     .char-img {
@@ -307,7 +304,7 @@
       transition: width 0.2s steps(8, end);
     }
 
-    /* 追加フォーム（スマホはみ出し完全防止） */
+    /* 追加フォーム */
     .add-form {
       display: flex;
       gap: 6px;
@@ -611,16 +608,14 @@
     <div class="header">
       <div class="title-group">
         <h1>ToDo</h1>
-        <!-- 背景が白く抜けるキャラアバターボタン -->
+        <!-- 枠なし・背景なしのアバターボタン -->
         <button class="char-avatar-btn" onclick="openImagePicker()" title="Change character">
           <img id="char-img" class="char-img" src="" alt="Character">
         </button>
         <input type="file" id="char-file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
       </div>
       <div class="header-actions">
-        <!-- GB風サウンド切替ボタン -->
         <button id="sound-toggle-btn" class="icon-action-btn" onclick="toggleSound()" title="Toggle Sound"></button>
-        <!-- GB風リマインダー通知設定ボタン（ピクセルベル） -->
         <button class="icon-action-btn" onclick="openNotifModal()" title="Reminder Notification">
           <svg viewBox="0 0 16 16" fill="currentColor">
             <rect x="7" y="1" width="2" height="2"/>
@@ -630,7 +625,6 @@
             <rect x="7" y="13" width="2" height="2"/>
           </svg>
         </button>
-        <!-- GB風オートリセット設定時計ボタン（ピクセルクロック） -->
         <button class="icon-action-btn" onclick="openResetModal()" title="Auto-reset settings">
           <svg viewBox="0 0 16 16" fill="currentColor">
             <rect x="5" y="1" width="6" height="1"/>
@@ -703,13 +697,21 @@
   <div class="modal-backdrop" id="notif-modal">
     <div class="modal-card">
       <h3>REMINDER</h3>
-      <p>Set a daily reminder alert for pending tasks.</p>
-      <div class="time-input-group">
+      <p>Set daily alert time & custom message.<br>Use <code>{streak}</code> and <code>{pending}</code> as tags.</p>
+      
+      <div class="time-input-group" style="margin-bottom: 8px;">
         <input type="time" id="notif-time-input" value="20:00">
       </div>
+
+      <div style="margin-bottom: 14px;">
+        <input type="text" id="notif-msg-input" class="add-input" 
+          placeholder="Your {streak} days streak is waiting!" 
+          style="font-size: 0.85rem; width: 100%;">
+      </div>
+
       <div class="modal-actions">
         <button class="modal-btn secondary" onclick="closeNotifModal()">CANCEL</button>
-        <button class="modal-btn primary" onclick="saveNotifSettings()">ENABLE</button>
+        <button class="modal-btn primary" onclick="saveNotifSettings()">SAVE</button>
       </div>
     </div>
   </div>
@@ -802,7 +804,7 @@
         const gain = ctx.createGain();
         osc.type = "triangle";
         osc.frequency.setValueAtTime(440, now);
-        osc.frequency.exponentialRampToValueAtTime(220, now + 0.12);
+        osc.exponentialRampToValueAtTime(220, now + 0.12);
         gain.gain.setValueAtTime(0.12, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
         osc.connect(gain);
@@ -838,8 +840,8 @@
       }
     }
 
-    /* デフォルトのアバターSVG（背景のグレー四角を完全透過化し、白地が活きるよう更新） */
-    const defaultAvatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="none"/><rect x="4" y="3" width="8" height="9" fill="%23f1f5f9"/><rect x="3" y="5" width="10" height="6" fill="%23f1f5f9"/><rect x="5" y="6" width="1" height="2" fill="%233d4f58"/><rect x="10" y="6" width="1" height="2" fill="%233d4f58"/><rect x="7" y="8" width="2" height="1" fill="%233d4f58"/><rect x="4" y="8" width="1" height="1" fill="%23f472b6"/><rect x="11" y="8" width="1" height="1" fill="%23f472b6"/><rect x="2" y="9" width="2" height="2" fill="%23cbd5e1"/><rect x="12" y="9" width="2" height="2" fill="%23cbd5e1"/></svg>`;
+    /* デフォルトのアバターSVG */
+    const defaultAvatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="none"/><rect x="4" y="3" width="8" height="9" fill="%23ffffff"/><rect x="3" y="5" width="10" height="6" fill="%23ffffff"/><rect x="5" y="6" width="1" height="2" fill="%23223038"/><rect x="10" y="6" width="1" height="2" fill="%23223038"/><rect x="7" y="8" width="2" height="1" fill="%23223038"/><rect x="4" y="8" width="1" height="1" fill="%23f472b6"/><rect x="11" y="8" width="1" height="1" fill="%23f472b6"/><rect x="2" y="9" width="2" height="2" fill="%23cbd5e1"/><rect x="12" y="9" width="2" height="2" fill="%23cbd5e1"/></svg>`;
 
     let userAvatar = localStorage.getItem("todoAppAvatar") || defaultAvatarSvg;
     document.getElementById("char-img").src = userAvatar;
@@ -914,14 +916,17 @@
       }
     }
 
-    /* Notification Logic */
+    /* Notification Logic (Custom Message & Placeholders) */
     let notifTime = localStorage.getItem("todoNotifTime") || "";
+    let notifMessage = localStorage.getItem("todoNotifMessage") || "Your {streak} days streak is on the line! {pending} task(s) left.";
     let lastNotifDate = localStorage.getItem("todoLastNotifDate") || "";
 
     function openNotifModal() {
       document.getElementById("notif-time-input").value = notifTime || "20:00";
+      document.getElementById("notif-msg-input").value = notifMessage;
       document.getElementById("notif-modal").classList.add("open");
     }
+    
     function closeNotifModal() {
       document.getElementById("notif-modal").classList.remove("open");
     }
@@ -940,9 +945,17 @@
 
       if (permission === "granted") {
         notifTime = document.getElementById("notif-time-input").value;
+        const msgVal = document.getElementById("notif-msg-input").value.trim();
+        notifMessage = msgVal || "Your {streak} days streak is waiting! {pending} task(s) remaining.";
+        
         localStorage.setItem("todoNotifTime", notifTime);
+        localStorage.setItem("todoNotifMessage", notifMessage);
+
+        const currentStreak = categoryStreaks[currentCategory] ? categoryStreaks[currentCategory].current : 0;
+        const previewMsg = notifMessage.replace(/\{streak\}/g, currentStreak).replace(/\{pending\}/g, "X");
+
         new Notification("ToDo Notification Active", {
-          body: `Daily reminder set for ${notifTime}.`
+          body: `Set for ${notifTime}\n"${previewMsg}"`
         });
       } else {
         alert("Notification permission was denied.");
@@ -964,8 +977,13 @@
         });
 
         if (pendingCount > 0) {
-          new Notification("ToDo Reminder", {
-            body: `You still have ${pendingCount} pending task${pendingCount > 1 ? "s" : ""} today!`
+          const currentStreak = categoryStreaks[currentCategory] ? categoryStreaks[currentCategory].current : 0;
+          const formattedBody = notifMessage
+            .replace(/\{streak\}/g, currentStreak)
+            .replace(/\{pending\}/g, pendingCount);
+
+          new Notification("ToDo Streak Alert", {
+            body: formattedBody
           });
         }
         lastNotifDate = todayStr;
@@ -1364,7 +1382,7 @@
       render();
     }
 
-    /* 下からウワッと打ち上がるピクセル紙吹雪エンジン */
+    /* 画面上部までウワッと打ち上がるピクセル紙吹雪エンジン */
     const canvas = document.getElementById("confetti-canvas");
     const ctx = canvas.getContext("2d");
     let particles = [];
@@ -1386,20 +1404,20 @@
       resizeCanvas();
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const count = 90;
+      const count = 110;
       const colors = ["#d94b26", "#ffd166", "#3ea055", "#4290f5", "#ffffff", "#f97316"];
 
       for (let i = 0; i < count; i++) {
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.0;
-        const speed = Math.random() * 11 + 14;
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.9;
+        const speed = Math.random() * 10 + 22;
 
         particles.push({
           x: Math.random() * w,
-          y: h + 10,
+          y: h + 15,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          gravity: 0.38,
-          drag: 0.965,
+          gravity: 0.32,
+          drag: 0.985,
           size: Math.floor(Math.random() * 3 + 6),
           color: colors[Math.floor(Math.random() * colors.length)],
           opacity: 1
@@ -1425,11 +1443,11 @@
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.vy > 1) {
-          p.opacity -= 0.016;
+        if (p.vy > 2) {
+          p.opacity -= 0.012;
         }
 
-        if (p.opacity <= 0 || p.y > h + 40) {
+        if (p.opacity <= 0 || p.y > h + 50) {
           particles.splice(i, 1);
           continue;
         }
