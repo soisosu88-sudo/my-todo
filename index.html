@@ -45,7 +45,8 @@
     body {
       font-family: var(--font-pixel);
       margin: 0;
-      padding: 12px 10px;
+      /* スマホ表示時にリスト全体が適度に下がるよう上部余白を調整 */
+      padding: 32px 12px 24px 12px;
       color: var(--pixel-text);
       display: flex;
       justify-content: center;
@@ -74,10 +75,11 @@
       background: var(--window-bg);
       border: 3px solid var(--pixel-line);
       box-shadow: 4px 4px 0px var(--pixel-shadow);
-      padding: 12px 12px 16px 12px;
+      padding: 14px 12px 18px 12px;
       position: relative;
       z-index: 1;
-      margin-bottom: 24px;
+      margin-top: 10px;
+      margin-bottom: 30px;
     }
 
     .header {
@@ -485,11 +487,12 @@
       background: #ffffff;
     }
 
+    /* GB風ピクセルチェックボックス */
     .checkbox {
       appearance: none;
       -webkit-appearance: none;
-      width: 17px;
-      height: 17px;
+      width: 18px;
+      height: 18px;
       border: 2px solid var(--pixel-line);
       margin-right: 8px;
       background: #ffffff;
@@ -498,16 +501,25 @@
       place-content: center;
       flex-shrink: 0;
       pointer-events: none;
+      box-shadow: 1px 1px 0px rgba(61, 79, 88, 0.2);
     }
     .checkbox:checked {
       background: var(--accent-orange);
-      border-color: var(--accent-orange);
+      border-color: var(--pixel-line);
     }
+    /* GBスプライト風 8-bit ピクセルチェックマーク */
     .checkbox:checked::after {
-      content: "✔";
-      font-size: 11px;
-      color: #ffffff;
-      line-height: 1;
+      content: "";
+      width: 10px;
+      height: 10px;
+      background-color: #ffffff;
+      -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' shape-rendering='crispEdges'><rect x='7' y='1' width='2' height='2'/><rect x='6' y='3' width='2' height='2'/><rect x='5' y='5' width='2' height='2'/><rect x='4' y='7' width='2' height='2'/><rect x='2' y='5' width='2' height='2'/><rect x='1' y='4' width='2' height='2'/></svg>");
+      mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' shape-rendering='crispEdges'><rect x='7' y='1' width='2' height='2'/><rect x='6' y='3' width='2' height='2'/><rect x='5' y='5' width='2' height='2'/><rect x='4' y='7' width='2' height='2'/><rect x='2' y='5' width='2' height='2'/><rect x='1' y='4' width='2' height='2'/></svg>");
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      display: block;
     }
 
     .del-item-btn {
@@ -925,7 +937,6 @@
           "準備万端！いつでもOK！"
         ];
       } else if (remainingCount === 0) {
-        // STREAK関連のセリフを削除
         dialoguePool = [
           "かんぺき！えらすぎる！",
           "きょうのタスクは オールクリア！",
@@ -1528,7 +1539,7 @@
       render();
     }
 
-    /* Pixel Confetti Engine（打ち上げ速度アップ＆キビキビ動くよう調整） */
+    /* Pixel Confetti Engine */
     const canvas = document.getElementById("confetti-canvas");
     const ctx = canvas.getContext("2d");
     ctx.imageSmoothingEnabled = false;
@@ -1552,7 +1563,7 @@
         y: Math.floor(y),
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        gravity: 0.42, // 重力を上げてキビキビ落下
+        gravity: 0.42,
         drag: 0.988,
         size: Math.floor(Math.random() * 3 + 6),
         color: colors[Math.floor(Math.random() * colors.length)],
@@ -1565,7 +1576,6 @@
       const countSide = 40;
       const countCenter = 35;
 
-      // 初速 baseSpeed を高速化（14 -> 21, 15.5 -> 23.5）
       for (let i = 0; i < countSide; i++) {
         particles.push(createPixelParticle(canvas.width * 0.1, bottomY, -Math.PI * 0.32, 21));
       }
@@ -1593,7 +1603,6 @@
         p.x += p.vx;
         p.y += p.vy;
 
-        // 下降開始時のフェード速度を上げてテンポよく消去
         if (p.vy > 2.0) {
           p.opacity -= 0.035;
         }
