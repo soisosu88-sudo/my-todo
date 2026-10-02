@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>ToDo - Town Edition</title>
 
   <!-- PWA Settings -->
@@ -46,17 +46,19 @@
     body {
       font-family: var(--font-dot);
       margin: 0;
-      padding: 16px 10px;
+      /* スマホのノッチやホームバーを考慮したセーフエリアパディング */
+      padding: max(16px, env(safe-area-inset-top)) 10px max(24px, env(safe-area-inset-bottom)) 10px;
       color: var(--pixel-text);
       display: flex;
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
+      min-height: 100dvh; /* スマホブラウザのアドレスバー変動対応 */
       overflow-x: hidden;
       position: relative;
       letter-spacing: 0.02em;
 
-      /* ポケモン（マサラタウン風）ドット絵マップ背景 */
+      /* ポケモン（マサラタウン風）ドット絵マップ背景：スマホ縦画面にフィット */
       background-color: #a0d8b0;
       background-image: url('image_2f3af1.jpg');
       background-size: cover;
@@ -65,7 +67,7 @@
       background-attachment: fixed;
     }
 
-    /* 液晶風の走査線/微細ドットフィルター */
+    /* 走査線/微細ドットフィルター */
     body::before {
       content: "";
       position: fixed;
@@ -89,7 +91,7 @@
       z-index: 99999;
     }
 
-    /* GBA/DS 会話ウィンドウ風コンテナ */
+    /* GBA/DS ウィンドウコンテナ */
     .app-container {
       width: 100%;
       max-width: 420px;
@@ -102,6 +104,7 @@
       z-index: 1;
       margin-bottom: 24px;
       border-radius: 2px;
+      box-sizing: border-box;
     }
 
     .header {
@@ -158,8 +161,9 @@
       box-shadow: 0px 0px 0px var(--pixel-shadow);
     }
 
+    /* キャラクターアイコン枠（背景を純白に固定） */
     .char-avatar-btn {
-      background: #fff;
+      background: #ffffff !important;
       border: var(--line-border);
       box-shadow: 2px 2px 0px var(--pixel-shadow);
       padding: 1px;
@@ -167,6 +171,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
     }
     .char-avatar-btn:active {
       transform: translate(2px, 2px);
@@ -174,9 +181,11 @@
     }
 
     .char-img {
-      width: 26px;
-      height: 26px;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
+      background: transparent;
+      image-rendering: pixelated;
     }
 
     .del-category-btn {
@@ -298,15 +307,20 @@
       transition: width 0.2s steps(8, end);
     }
 
-    /* 追加フォーム */
+    /* 追加フォーム（スマホはみ出し完全防止） */
     .add-form {
       display: flex;
-      gap: 5px;
+      gap: 6px;
       margin-bottom: 10px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .add-input {
-      flex: 1;
+      flex: 1 1 auto;
+      min-width: 0;
+      width: 100%;
       padding: 6px 10px;
       border: var(--line-border);
       background: #ffffff;
@@ -316,6 +330,7 @@
       letter-spacing: 0.02em;
       color: var(--pixel-text);
       outline: none;
+      box-sizing: border-box;
     }
     .add-input::placeholder {
       font-family: var(--font-dot);
@@ -329,8 +344,9 @@
     }
 
     .add-btn {
-      width: 33px;
-      height: 33px;
+      flex: 0 0 34px;
+      width: 34px;
+      height: 34px;
       padding: 0;
       background: var(--btn-green);
       color: #ffffff;
@@ -344,7 +360,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      flex-shrink: 0;
+      box-sizing: border-box;
     }
     .add-btn:active {
       transform: translate(2px, 2px);
@@ -367,6 +383,7 @@
       border: 2px solid var(--task-line);
       box-shadow: 2px 2px 0px rgba(59, 80, 92, 0.15);
       user-select: none;
+      box-sizing: border-box;
     }
 
     .item-row.dragging {
@@ -399,6 +416,7 @@
       font-weight: 700;
       letter-spacing: -0.01em;
       line-height: 1.35;
+      word-break: break-word;
     }
 
     .item-row.checked .item-text {
@@ -425,6 +443,7 @@
       border: 2px solid var(--accent-orange);
       outline: none;
       background: #ffffff;
+      box-sizing: border-box;
     }
 
     .checkbox {
@@ -592,6 +611,7 @@
     <div class="header">
       <div class="title-group">
         <h1>ToDo</h1>
+        <!-- 背景が白く抜けるキャラアバターボタン -->
         <button class="char-avatar-btn" onclick="openImagePicker()" title="Change character">
           <img id="char-img" class="char-img" src="" alt="Character">
         </button>
@@ -818,7 +838,8 @@
       }
     }
 
-    const defaultAvatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="%23cbd5e1"/><rect x="4" y="3" width="8" height="9" fill="%23ffffff"/><rect x="3" y="5" width="10" height="6" fill="%23ffffff"/><rect x="5" y="6" width="1" height="2" fill="%233d4f58"/><rect x="10" y="6" width="1" height="2" fill="%233d4f58"/><rect x="7" y="8" width="2" height="1" fill="%233d4f58"/><rect x="4" y="8" width="1" height="1" fill="%23f472b6"/><rect x="11" y="8" width="1" height="1" fill="%23f472b6"/><rect x="2" y="9" width="2" height="2" fill="%23e2e8f0"/><rect x="12" y="9" width="2" height="2" fill="%23e2e8f0"/></svg>`;
+    /* デフォルトのアバターSVG（背景のグレー四角を完全透過化し、白地が活きるよう更新） */
+    const defaultAvatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="none"/><rect x="4" y="3" width="8" height="9" fill="%23f1f5f9"/><rect x="3" y="5" width="10" height="6" fill="%23f1f5f9"/><rect x="5" y="6" width="1" height="2" fill="%233d4f58"/><rect x="10" y="6" width="1" height="2" fill="%233d4f58"/><rect x="7" y="8" width="2" height="1" fill="%233d4f58"/><rect x="4" y="8" width="1" height="1" fill="%23f472b6"/><rect x="11" y="8" width="1" height="1" fill="%23f472b6"/><rect x="2" y="9" width="2" height="2" fill="%23cbd5e1"/><rect x="12" y="9" width="2" height="2" fill="%23cbd5e1"/></svg>`;
 
     let userAvatar = localStorage.getItem("todoAppAvatar") || defaultAvatarSvg;
     document.getElementById("char-img").src = userAvatar;
@@ -1128,7 +1149,7 @@
       streakBadge.classList.toggle("zero", catStreak === 0);
 
       if (allChecked && !wasAllCompleted) {
-        triggerPixelCrackers();
+        triggerBottomConfetti();
         playSound("fanfare");
         triggerHaptic([40, 60, 40]);
         updateStreakOnAllCompleted(currentCategory);
@@ -1343,7 +1364,7 @@
       render();
     }
 
-    /* Pixel Confetti Engine */
+    /* 下からウワッと打ち上がるピクセル紙吹雪エンジン */
     const canvas = document.getElementById("confetti-canvas");
     const ctx = canvas.getContext("2d");
     let particles = [];
@@ -1361,43 +1382,36 @@
     });
     resizeCanvas();
 
-    function createPixelParticle(x, y, angleBase, baseSpeed) {
-      const colors = ["#d94b26", "#ffd166", "#3ea055", "#4290f5", "#ffffff", "#223038"];
-      const angle = angleBase + (Math.random() - 0.5) * 0.7;
-      const speed = Math.random() * (baseSpeed * 0.5) + baseSpeed;
-
-      return {
-        x: x,
-        y: y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        gravity: 0.28,
-        drag: 0.97,
-        size: Math.floor(Math.random() * 3 + 6),
-        color: colors[Math.floor(Math.random() * colors.length)],
-        opacity: 1
-      };
-    }
-
-    function triggerPixelCrackers() {
+    function triggerBottomConfetti() {
       resizeCanvas();
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const cornerCount = 45;
+      const count = 90;
+      const colors = ["#d94b26", "#ffd166", "#3ea055", "#4290f5", "#ffffff", "#f97316"];
 
-      for (let i = 0; i < cornerCount; i++) {
-        particles.push(createPixelParticle(0, h * 0.9, -Math.PI / 4, 12));
-        particles.push(createPixelParticle(w, h * 0.9, -Math.PI * 0.75, 12));
-        particles.push(createPixelParticle(0, h * 0.1, Math.PI / 4, 10));
-        particles.push(createPixelParticle(w, h * 0.1, Math.PI * 0.75, 10));
+      for (let i = 0; i < count; i++) {
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.0;
+        const speed = Math.random() * 11 + 14;
+
+        particles.push({
+          x: Math.random() * w,
+          y: h + 10,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          gravity: 0.38,
+          drag: 0.965,
+          size: Math.floor(Math.random() * 3 + 6),
+          color: colors[Math.floor(Math.random() * colors.length)],
+          opacity: 1
+        });
       }
 
       if (!animationFrameId) {
-        updatePixelConfetti();
+        updateBottomConfetti();
       }
     }
 
-    function updatePixelConfetti() {
+    function updateBottomConfetti() {
       const w = window.innerWidth;
       const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
@@ -1411,11 +1425,11 @@
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.y > h * 0.65) {
-          p.opacity -= 0.02;
+        if (p.vy > 1) {
+          p.opacity -= 0.016;
         }
 
-        if (p.opacity <= 0 || p.y > h + 30) {
+        if (p.opacity <= 0 || p.y > h + 40) {
           particles.splice(i, 1);
           continue;
         }
@@ -1427,7 +1441,7 @@
       ctx.globalAlpha = 1.0;
 
       if (particles.length > 0) {
-        animationFrameId = requestAnimationFrame(updatePixelConfetti);
+        animationFrameId = requestAnimationFrame(updateBottomConfetti);
       } else {
         ctx.clearRect(0, 0, w, h);
         animationFrameId = null;
