@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ToDo - Town Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
+  <title>ToDo - DS Edition</title>
 
   <!-- PWA Settings -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,28 +13,27 @@
   <!-- ホーム画面アイコン：アザラシ（🦭） -->
   <link rel="apple-touch-icon" href="https://fav.farm/🦭">
 
-  <!-- Google Fonts: 高視認性モダンフォント + 読みやすいドットフォント (DotGothic16) -->
+  <!-- Google Fonts: ドットフォント (Press Start 2P) + 通常フォント (Plus Jakarta Sans / Noto Sans JP) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      /* GBA/DS ポケモン風パレット */
-      --window-bg: #f8faf8;
-      --pixel-line: #3b505c;
-      --pixel-shadow: #28373f;
-      --task-line: #425866;
-      --pixel-text: #223038;
-      --pixel-gray: #889ba6;
-      --pixel-dark-gray: #4b606d;
-      --accent-orange: #d94b26;
-      --btn-green: #3ea055;
+      --pixel-bg: #dbe4d0;
+      --window-bg: #ffffff;
+      --pixel-line: #3d4f58;
+      --pixel-shadow: #3d4f58;
+      --pixel-text: #2c383f;
+      --pixel-gray: #94a3b8;
+      --pixel-dark-gray: #546671;
+      --accent-orange: #ff5400;
+      --btn-green: #22c55e;
       --line-border: 2px solid var(--pixel-line);
 
       /* フォント定義 */
-      --font-modern: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
-      --font-dot: 'DotGothic16', monospace, sans-serif;
+      --font-pixel: 'Press Start 2P', monospace;
+      --font-text: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
     }
 
     * {
@@ -44,66 +43,41 @@
     }
 
     body {
-      font-family: var(--font-dot);
+      font-family: var(--font-pixel);
       margin: 0;
-      padding: max(16px, env(safe-area-inset-top)) 10px max(24px, env(safe-area-inset-bottom)) 10px;
+      padding: 12px 10px;
       color: var(--pixel-text);
       display: flex;
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
-      min-height: 100dvh;
       overflow-x: hidden;
       position: relative;
-      letter-spacing: 0.02em;
-
-      /* ポケモン（マサラタウン風）ドット絵マップ背景 */
-      background-color: #a0d8b0;
-      background-image: url('image_2f3af1.jpg');
-      background-size: cover;
-      background-position: center top;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-    }
-
-    /* 走査線/微細ドットフィルター */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-      background: linear-gradient(rgba(0, 0, 0, 0.03) 50%, rgba(255, 255, 255, 0.03) 50%);
-      background-size: 100% 4px;
+      background-color: var(--pixel-bg);
+      letter-spacing: 0;
     }
 
     #confetti-canvas {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
-      z-index: 99999;
+      z-index: 999;
     }
 
-    /* GBA/DS ウィンドウコンテナ */
+    /* DSウィンドウ風コンテナ */
     .app-container {
       width: 100%;
       max-width: 420px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(2px);
+      background: var(--window-bg);
       border: 3px solid var(--pixel-line);
-      box-shadow: 0 0 0 2px #f8faf8, 4px 5px 0px 2px var(--pixel-shadow);
+      box-shadow: 4px 4px 0px var(--pixel-shadow);
       padding: 12px 12px 16px 12px;
       position: relative;
       z-index: 1;
       margin-bottom: 24px;
-      border-radius: 2px;
-      box-sizing: border-box;
     }
 
     .header {
@@ -113,22 +87,23 @@
       margin-bottom: 8px;
       padding-bottom: 6px;
       border-bottom: var(--line-border);
+      position: relative;
     }
 
     .title-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      position: relative;
     }
 
     h1 {
-      font-family: var(--font-dot);
-      font-size: 1.45rem;
-      font-weight: 700;
+      font-family: var(--font-pixel);
+      font-size: 1.15rem;
       margin: 0;
       color: var(--pixel-text);
       line-height: 1;
-      letter-spacing: 0.04em;
+      letter-spacing: -0.04em;
     }
 
     .header-actions {
@@ -138,51 +113,95 @@
     }
 
     .icon-action-btn {
-      background: #eef4f8;
+      background: #f1f5f9;
       border: var(--line-border);
       box-shadow: 2px 2px 0px var(--pixel-shadow);
       cursor: pointer;
-      padding: 2px;
+      padding: 3px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--pixel-text);
-      min-width: 28px;
+      width: 28px;
       height: 28px;
+      transition: transform 0.05s ease;
     }
     .icon-action-btn svg {
-      width: 16px;
-      height: 16px;
-      display: block;
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
     }
     .icon-action-btn:active {
       transform: translate(2px, 2px);
       box-shadow: 0px 0px 0px var(--pixel-shadow);
     }
 
-    /* キャラクターアイコン枠なし */
+    /* キャラクター画像ボタン */
     .char-avatar-btn {
-      background: none !important;
-      border: none !important;
-      box-shadow: none !important;
+      background: transparent;
+      border: none;
+      box-shadow: none;
       padding: 0;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
-      height: 32px;
+      outline: none;
+      position: relative;
     }
     .char-avatar-btn:active {
       transform: scale(0.92);
     }
 
     .char-img {
-      width: 100%;
-      height: 100%;
+      width: 28px;
+      height: 28px;
       object-fit: contain;
-      background: transparent;
-      image-rendering: pixelated;
+      background: #ffffff;
+      display: block;
+    }
+
+    /* レトロRPG風フキダシ */
+    .speech-bubble {
+      position: absolute;
+      top: 36px;
+      left: 12px;
+      background: #ffffff;
+      border: 2px solid var(--pixel-line);
+      box-shadow: 3px 3px 0px var(--pixel-shadow);
+      padding: 6px 10px;
+      font-family: var(--font-text);
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--pixel-text);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-4px) scale(0.95);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 100;
+    }
+    .speech-bubble::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 36px;
+      border-width: 0 5px 6px 5px;
+      border-style: solid;
+      border-color: transparent transparent var(--pixel-line) transparent;
+    }
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      top: -3px;
+      left: 37px;
+      border-width: 0 4px 4px 4px;
+      border-style: solid;
+      border-color: transparent transparent #ffffff transparent;
+    }
+    .speech-bubble.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
 
     .del-category-btn {
@@ -190,14 +209,11 @@
       border: var(--line-border);
       box-shadow: 2px 2px 0px var(--pixel-shadow);
       color: #b91c1c;
-      font-family: var(--font-dot);
-      font-size: 0.8rem;
-      font-weight: 700;
+      font-family: var(--font-pixel);
+      font-size: 0.58rem;
       cursor: pointer;
-      padding: 3px 6px;
-      height: 28px;
-      display: flex;
-      align-items: center;
+      padding: 5px 6px;
+      line-height: 1;
     }
     .del-category-btn:active {
       transform: translate(2px, 2px);
@@ -218,16 +234,16 @@
 
     .tab-btn {
       padding: 5px 12px;
-      background: #eef4f8;
+      background: #f1f5f9;
       border: var(--line-border);
       box-shadow: 2px 2px 0px var(--pixel-shadow);
-      font-family: var(--font-modern);
+      font-family: var(--font-text);
       font-size: 0.84rem;
       font-weight: 800;
-      letter-spacing: -0.01em;
       color: var(--pixel-dark-gray);
       cursor: pointer;
       white-space: nowrap;
+      transition: transform 0.05s ease;
     }
 
     .tab-btn.active {
@@ -237,26 +253,31 @@
       box-shadow: 0px 0px 0px var(--pixel-shadow);
     }
 
+    /* カテゴリ追加ボタン */
     .add-tab-btn {
-      padding: 5px 8px;
+      padding: 5px 10px;
       background: #ffffff;
       border: 2px dashed #94a3b8;
-      font-family: var(--font-modern);
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
+      font-family: var(--font-pixel);
+      font-size: 0.72rem;
+      line-height: 1;
       color: var(--pixel-dark-gray);
       cursor: pointer;
       white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .add-tab-btn:active {
       background: #f8fafc;
       border-color: var(--pixel-line);
+      color: var(--pixel-text);
+      transform: translate(1px, 1px);
     }
 
     /* Status Panel */
     .status-panel {
-      background: #f0f7f4;
+      background: #f8fafc;
       border: var(--line-border);
       padding: 8px 10px;
       margin-top: 8px;
@@ -268,31 +289,54 @@
       align-items: center;
       margin-bottom: 6px;
     }
+
+    /* ドット絵スター付きストリークバッジ */
     .streak-badge {
-      font-family: var(--font-dot);
-      font-size: 0.86rem;
-      font-weight: 700;
+      font-family: var(--font-pixel);
+      font-size: 0.62rem;
+      line-height: 1;
       color: var(--accent-orange);
       background: #fff;
-      padding: 2px 6px;
+      padding: 4px 6px;
       border: 1px solid var(--pixel-line);
-      letter-spacing: 0.05em;
+      box-shadow: 1px 1px 0px var(--pixel-shadow);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .streak-badge svg {
+      width: 10px;
+      height: 10px;
+      fill: var(--accent-orange);
+      flex-shrink: 0;
     }
     .streak-badge.zero {
       color: var(--pixel-gray);
       border-color: #cbd5e1;
+      box-shadow: none;
     }
+    .streak-badge.zero svg {
+      fill: var(--pixel-gray);
+    }
+
+    .pixel-pop {
+      animation: pixelPop 0.3s steps(3, end);
+    }
+    @keyframes pixelPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.35) translateY(-1px); }
+      100% { transform: scale(1); }
+    }
+
     .progress-text {
-      font-family: var(--font-dot);
-      font-size: 0.88rem;
-      font-weight: 700;
+      font-family: var(--font-pixel);
+      font-size: 0.60rem;
       color: var(--pixel-dark-gray);
-      letter-spacing: 0.03em;
     }
     .progress-bar-track {
       width: 100%;
       height: 7px;
-      background: #d8e5db;
+      background: #e2e8f0;
       border: 1px solid var(--pixel-line);
       position: relative;
     }
@@ -301,39 +345,31 @@
       height: 100%;
       width: 0%;
       background: var(--btn-green);
-      transition: width 0.2s steps(8, end);
+      transition: width 0.25s steps(10, end);
     }
 
     /* 追加フォーム */
     .add-form {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       margin-bottom: 10px;
-      width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
     }
 
     .add-input {
-      flex: 1 1 auto;
-      min-width: 0;
-      width: 100%;
+      flex: 1;
       padding: 6px 10px;
       border: var(--line-border);
       background: #ffffff;
-      font-family: var(--font-dot);
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      font-family: var(--font-text);
+      font-size: 0.92rem;
+      font-weight: 600;
       color: var(--pixel-text);
       outline: none;
-      box-sizing: border-box;
     }
     .add-input::placeholder {
-      font-family: var(--font-dot);
+      font-family: var(--font-pixel);
+      font-size: 0.68rem;
       color: #94a3b8;
-      font-weight: 700;
-      letter-spacing: 0.03em;
     }
     .add-input:focus {
       background: #fffbeb;
@@ -341,23 +377,20 @@
     }
 
     .add-btn {
-      flex: 0 0 34px;
-      width: 34px;
-      height: 34px;
+      width: 33px;
+      height: 33px;
       padding: 0;
       background: var(--btn-green);
       color: #ffffff;
       border: var(--line-border);
       box-shadow: 2px 2px 0px var(--pixel-shadow);
-      font-family: var(--font-dot);
-      font-weight: 700;
-      font-size: 1.25rem;
-      line-height: 1;
+      font-family: var(--font-pixel);
+      font-size: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-sizing: border-box;
+      flex-shrink: 0;
     }
     .add-btn:active {
       transform: translate(2px, 2px);
@@ -377,10 +410,22 @@
       align-items: center;
       padding: 7px 8px;
       background: #ffffff;
-      border: 2px solid var(--task-line);
-      box-shadow: 2px 2px 0px rgba(59, 80, 92, 0.15);
+      border: var(--line-border);
+      box-shadow: 2px 2px 0px rgba(61, 79, 88, 0.12);
       user-select: none;
-      box-sizing: border-box;
+      transition: transform 0.08s ease, background-color 0.15s ease;
+    }
+    .item-row:active {
+      transform: translate(1px, 1px);
+    }
+
+    .item-row.just-checked {
+      animation: checkFlash 0.2s steps(2, end);
+    }
+    @keyframes checkFlash {
+      0% { background: #ffedd5; }
+      50% { background: #ffffff; }
+      100% { background: #f8fafc; }
     }
 
     .item-row.dragging {
@@ -391,7 +436,7 @@
 
     .drag-handle {
       cursor: grab;
-      color: #94a3b8;
+      color: #cbd5e1;
       padding: 0 4px 0 0;
       display: flex;
       align-items: center;
@@ -400,7 +445,7 @@
     }
 
     .item-row.checked {
-      background: #f1f5f9;
+      background: #f8fafc;
       border-color: #cbd5e1;
       box-shadow: none;
       opacity: 0.65;
@@ -408,10 +453,9 @@
 
     .item-text {
       flex: 1;
-      font-family: var(--font-modern);
+      font-family: var(--font-text);
       font-size: 0.94rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
       line-height: 1.35;
       word-break: break-word;
     }
@@ -432,15 +476,13 @@
 
     .inline-edit-input {
       flex: 1;
-      font-family: var(--font-modern);
+      font-family: var(--font-text);
       font-size: 0.94rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
       padding: 2px 4px;
       border: 2px solid var(--accent-orange);
       outline: none;
       background: #ffffff;
-      box-sizing: border-box;
     }
 
     .checkbox {
@@ -455,14 +497,15 @@
       display: grid;
       place-content: center;
       flex-shrink: 0;
+      pointer-events: none;
     }
     .checkbox:checked {
       background: var(--accent-orange);
       border-color: var(--accent-orange);
     }
     .checkbox:checked::after {
-      content: "■";
-      font-size: 9px;
+      content: "✔";
+      font-size: 11px;
       color: #ffffff;
       line-height: 1;
     }
@@ -470,9 +513,9 @@
     .del-item-btn {
       background: none;
       border: none;
-      color: #94a3b8;
-      font-family: var(--font-dot);
-      font-size: 0.95rem;
+      color: #cbd5e1;
+      font-family: inherit;
+      font-size: 1rem;
       cursor: pointer;
       padding: 2px 4px;
       line-height: 1;
@@ -486,18 +529,20 @@
     }
     .completed-toggle-btn {
       width: 100%;
-      background: #f0f7f4;
+      background: #f8fafc;
       border: 1px solid #cbd5e1;
-      padding: 5px 8px;
+      padding: 7px 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       color: var(--pixel-dark-gray);
-      font-family: var(--font-dot);
-      font-size: 0.88rem;
-      font-weight: 700;
+      font-family: var(--font-pixel);
+      font-size: 0.62rem;
       cursor: pointer;
-      letter-spacing: 0.03em;
+      line-height: 1.2;
+    }
+    .completed-toggle-btn:active {
+      background: #e2e8f0;
     }
     .completed-items-container {
       display: flex;
@@ -512,10 +557,10 @@
     .empty-hint {
       text-align: center;
       color: var(--pixel-dark-gray);
-      font-family: var(--font-dot);
-      font-size: 0.9rem;
-      padding: 16px 0;
-      letter-spacing: 0.03em;
+      font-family: var(--font-pixel);
+      font-size: 0.64rem;
+      line-height: 1.4;
+      padding: 18px 0;
     }
 
     /* Modal */
@@ -541,22 +586,48 @@
       box-shadow: 4px 4px 0px var(--pixel-shadow);
       padding: 16px;
       width: 100%;
-      max-width: 310px;
-      font-family: var(--font-dot);
+      max-width: 330px;
     }
     .modal-card h3 {
-      margin: 0 0 8px 0;
-      font-size: 1.15rem;
-      font-weight: 700;
+      font-family: var(--font-pixel);
+      margin: 0 0 10px 0;
+      font-size: 0.85rem;
       border-bottom: var(--line-border);
-      padding-bottom: 4px;
-      letter-spacing: 0.05em;
+      padding-bottom: 6px;
+      line-height: 1.2;
     }
     .modal-card p {
-      font-size: 0.88rem;
+      font-family: var(--font-pixel);
+      font-size: 0.58rem;
       color: var(--pixel-dark-gray);
       margin: 0 0 12px 0;
-      line-height: 1.45;
+      line-height: 1.5;
+    }
+    .form-group {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-label {
+      font-family: var(--font-pixel);
+      font-size: 0.58rem;
+      color: var(--pixel-dark-gray);
+    }
+    .form-text-input {
+      width: 100%;
+      padding: 6px 8px;
+      border: var(--line-border);
+      font-family: var(--font-text);
+      font-size: 0.88rem;
+      font-weight: 700;
+      outline: none;
+      color: var(--pixel-text);
+      background: #fff;
+    }
+    .form-text-input:focus {
+      border-color: var(--accent-orange);
+      background: #fffbeb;
     }
     .time-input-group {
       display: flex;
@@ -566,9 +637,8 @@
       width: 100%;
       padding: 6px 8px;
       border: var(--line-border);
-      font-family: var(--font-modern);
-      font-size: 1rem;
-      font-weight: 700;
+      font-family: var(--font-pixel);
+      font-size: 0.85rem;
       outline: none;
       color: var(--pixel-text);
     }
@@ -578,10 +648,10 @@
       gap: 8px;
     }
     .modal-btn {
-      padding: 5px 12px;
-      font-family: var(--font-dot);
-      font-weight: 700;
-      font-size: 0.88rem;
+      padding: 6px 12px;
+      font-family: var(--font-pixel);
+      font-size: 0.62rem;
+      line-height: 1;
       border: var(--line-border);
       box-shadow: 2px 2px 0px var(--pixel-shadow);
       cursor: pointer;
@@ -608,34 +678,40 @@
     <div class="header">
       <div class="title-group">
         <h1>ToDo</h1>
-        <!-- 枠なし・背景なしのアバターボタン -->
-        <button class="char-avatar-btn" onclick="openImagePicker()" title="Change character">
+        <!-- タップでフキダシ / ダブルクリックまたは長押しで画像変更 -->
+        <button class="char-avatar-btn" id="char-btn" title="Tap to talk / Long press to change">
           <img id="char-img" class="char-img" src="" alt="Character">
         </button>
+        <!-- レトロフキダシ -->
+        <div id="speech-bubble" class="speech-bubble">タップしてね！</div>
         <input type="file" id="char-file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
       </div>
       <div class="header-actions">
-        <button id="sound-toggle-btn" class="icon-action-btn" onclick="toggleSound()" title="Toggle Sound"></button>
-        <button class="icon-action-btn" onclick="openNotifModal()" title="Reminder Notification">
-          <svg viewBox="0 0 16 16" fill="currentColor">
-            <rect x="7" y="1" width="2" height="2"/>
-            <rect x="6" y="3" width="4" height="2"/>
-            <rect x="5" y="5" width="6" height="5"/>
-            <rect x="2" y="10" width="12" height="2"/>
-            <rect x="7" y="13" width="2" height="2"/>
+        <!-- GB風ドット・ベル通知アイコン -->
+        <button class="icon-action-btn" onclick="openNotifyModal()" title="Notification settings">
+          <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+            <rect x="7" y="1" width="2" height="2" />
+            <rect x="6" y="3" width="4" height="2" />
+            <rect x="5" y="5" width="6" height="4" />
+            <rect x="3" y="9" width="10" height="2" />
+            <rect x="2" y="11" width="12" height="2" />
+            <rect x="7" y="13" width="2" height="2" />
           </svg>
         </button>
+        <!-- GB風ドット・時計アイコン -->
         <button class="icon-action-btn" onclick="openResetModal()" title="Auto-reset settings">
-          <svg viewBox="0 0 16 16" fill="currentColor">
-            <rect x="5" y="1" width="6" height="1"/>
-            <rect x="3" y="2" width="2" height="1"/><rect x="11" y="2" width="2" height="1"/>
-            <rect x="2" y="3" width="1" height="2"/><rect x="13" y="3" width="1" height="2"/>
-            <rect x="1" y="5" width="1" height="6"/><rect x="14" y="5" width="1" height="6"/>
-            <rect x="2" y="11" width="1" height="2"/><rect x="13" y="11" width="1" height="2"/>
-            <rect x="3" y="13" width="2" height="1"/><rect x="11" y="13" width="2" height="1"/>
-            <rect x="5" y="14" width="6" height="1"/>
-            <rect x="7" y="4" width="2" height="5"/>
-            <rect x="8" y="7" width="4" height="2"/>
+          <svg viewBox="0 0 16 16" shape-rendering="crispEdges">
+            <rect x="6" y="0" width="4" height="2" />
+            <rect x="4" y="2" width="8" height="2" />
+            <rect x="2" y="4" width="2" height="8" />
+            <rect x="12" y="4" width="2" height="8" />
+            <rect x="4" y="12" width="8" height="2" />
+            <rect x="3" y="3" width="2" height="2" />
+            <rect x="11" y="3" width="2" height="2" />
+            <rect x="3" y="11" width="2" height="2" />
+            <rect x="11" y="11" width="2" height="2" />
+            <rect x="7" y="5" width="2" height="4" />
+            <rect x="7" y="7" width="4" height="2" />
           </svg>
         </button>
         <button class="del-category-btn" onclick="deleteCurrentCategory()">DEL TAB</button>
@@ -645,13 +721,28 @@
     <!-- Category Tabs -->
     <div class="tabs-wrapper">
       <div id="tabs-container" style="display: flex; gap: 6px;"></div>
-      <button class="add-tab-btn" onclick="addNewCategory()">+ NEW</button>
+      <button class="add-tab-btn" onclick="addNewCategory()">+</button>
     </div>
 
     <!-- Status Panel -->
     <div class="status-panel">
       <div class="status-header">
-        <div id="streak-display" class="streak-badge">★ 0 DAYS</div>
+        <div id="streak-display" class="streak-badge">
+          <!-- 8x8 Pixel Star SVG -->
+          <svg viewBox="0 0 9 9" shape-rendering="crispEdges">
+            <rect x="4" y="0" width="1" height="1"/>
+            <rect x="4" y="1" width="1" height="1"/>
+            <rect x="1" y="2" width="7" height="1"/>
+            <rect x="2" y="3" width="5" height="1"/>
+            <rect x="3" y="4" width="3" height="1"/>
+            <rect x="2" y="5" width="5" height="1"/>
+            <rect x="1" y="6" width="3" height="1"/>
+            <rect x="5" y="6" width="3" height="1"/>
+            <rect x="0" y="7" width="2" height="1"/>
+            <rect x="7" y="7" width="2" height="1"/>
+          </svg>
+          <span id="streak-text">0 DAYS</span>
+        </div>
         <span id="progress-text" class="progress-text">0 / 0 CLEAR</span>
       </div>
       <div class="progress-bar-track">
@@ -661,7 +752,7 @@
 
     <!-- 追加フォーム -->
     <form class="add-form" onsubmit="addItem(event)">
-      <input type="text" id="new-item-input" class="add-input" placeholder="New task..." required>
+      <input type="text" id="new-item-input" class="add-input" placeholder="NEW TASK..." required>
       <button type="submit" class="add-btn" title="Add item">+</button>
     </form>
 
@@ -672,7 +763,7 @@
     <div class="completed-section open" id="completed-section" style="display: none;">
       <button class="completed-toggle-btn" onclick="toggleCompletedSection()">
         <span id="completed-title-count">CLEARED (0)</span>
-        <span class="toggle-arrow">▼</span>
+        <span class="toggle-arrow" id="toggle-arrow">▲</span>
       </button>
       <div class="completed-items-container" id="completed-items-container"></div>
     </div>
@@ -682,7 +773,7 @@
   <div class="modal-backdrop" id="reset-modal">
     <div class="modal-card">
       <h3>AUTO-RESET</h3>
-      <p>Set daily auto-reset time for completed items.</p>
+      <p>SET DAILY AUTO-RESET TIME FOR COMPLETED ITEMS.</p>
       <div class="time-input-group">
         <input type="time" id="reset-time-input" value="04:00">
       </div>
@@ -693,155 +784,105 @@
     </div>
   </div>
 
-  <!-- Reminder Notification Settings Modal -->
-  <div class="modal-backdrop" id="notif-modal">
+  <!-- Notification Settings Modal -->
+  <div class="modal-backdrop" id="notify-modal">
     <div class="modal-card">
-      <h3>REMINDER</h3>
-      <p>Set daily alert time & custom message.<br>Use <code>{streak}</code> and <code>{pending}</code> as tags.</p>
+      <h3>NOTIFY SETUP</h3>
+      <p>SET DAILY TIME & CUSTOM MESSAGE.<br>TAG: {streak} = CURRENT STREAK</p>
       
-      <div class="time-input-group" style="margin-bottom: 8px;">
-        <input type="time" id="notif-time-input" value="20:00">
+      <div class="form-group">
+        <label class="form-label" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="checkbox" id="notify-enabled" style="accent-color: var(--accent-orange); width: 15px; height: 15px;">
+          ENABLE NOTIFICATION
+        </label>
       </div>
 
-      <div style="margin-bottom: 14px;">
-        <input type="text" id="notif-msg-input" class="add-input" 
-          placeholder="Your {streak} days streak is waiting!" 
-          style="font-size: 0.85rem; width: 100%;">
+      <div class="form-group">
+        <label class="form-label">TIME</label>
+        <div class="time-input-group" style="margin-bottom: 0;">
+          <input type="time" id="notify-time-input" value="20:00">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">TITLE</label>
+        <input type="text" id="notify-title-input" class="form-text-input" placeholder="Routine Reminder">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">MESSAGE</label>
+        <input type="text" id="notify-body-input" class="form-text-input" placeholder="🔥 {streak} days streak! Time to clear your list.">
       </div>
 
       <div class="modal-actions">
-        <button class="modal-btn secondary" onclick="closeNotifModal()">CANCEL</button>
-        <button class="modal-btn primary" onclick="saveNotifSettings()">SAVE</button>
+        <button class="modal-btn secondary" onclick="closeNotifyModal()">CANCEL</button>
+        <button class="modal-btn primary" onclick="saveNotifySettings()">SAVE</button>
       </div>
     </div>
   </div>
 
   <script>
-    /* Haptics & Sound Engine (Web Audio API) */
+    /* Web Audio API - レトロゲーム音源 */
+    const SoundEngine = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume();
+        }
+      },
+      playTone(freq, type, duration, startTime = 0) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + startTime);
+        
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime + startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + startTime + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(this.ctx.currentTime + startTime);
+        osc.stop(this.ctx.currentTime + startTime + duration);
+      },
+      playCheck() {
+        this.init();
+        this.playTone(523.25, 'square', 0.08, 0);       // C5
+        this.playTone(659.25, 'square', 0.12, 0.07);    // E5
+      },
+      playUncheck() {
+        this.init();
+        this.playTone(440, 'square', 0.07, 0);          // A4
+        this.playTone(349.23, 'square', 0.10, 0.06);    // F4
+      },
+      playTalk() {
+        this.init();
+        this.playTone(880, 'sine', 0.05, 0);            // A5
+        this.playTone(1174.66, 'sine', 0.06, 0.04);     // D6
+      },
+      playAllClear() {
+        this.init();
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          this.playTone(freq, 'triangle', 0.18, idx * 0.1);
+        });
+      }
+    };
+
     function triggerHaptic(pattern = 15) {
       if ("vibrate" in navigator) {
         try { navigator.vibrate(pattern); } catch (e) {}
       }
     }
 
-    let soundEnabled = localStorage.getItem("todoSoundEnabled") !== "false";
-    let audioCtx = null;
-
-    function getAudioContext() {
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) audioCtx = new AudioContextClass();
-      }
-      if (audioCtx && audioCtx.state === "suspended") {
-        audioCtx.resume();
-      }
-      return audioCtx;
-    }
-
-    /* GB風 ピクセルSVGアイコン群 */
-    const gbSoundOnSvg = `
-      <svg viewBox="0 0 16 16" fill="currentColor">
-        <rect x="2" y="6" width="3" height="4"/>
-        <rect x="5" y="4" width="2" height="8"/>
-        <rect x="7" y="2" width="2" height="12"/>
-        <rect x="11" y="4" width="1" height="2"/>
-        <rect x="12" y="6" width="1" height="4"/>
-        <rect x="11" y="10" width="1" height="2"/>
-        <rect x="14" y="2" width="1" height="2"/>
-        <rect x="15" y="4" width="1" height="8"/>
-        <rect x="14" y="12" width="1" height="2"/>
-      </svg>
-    `;
-
-    const gbSoundOffSvg = `
-      <svg viewBox="0 0 16 16" fill="currentColor">
-        <rect x="1" y="6" width="3" height="4"/>
-        <rect x="4" y="4" width="2" height="8"/>
-        <rect x="6" y="2" width="2" height="12"/>
-        <rect x="10" y="5" width="2" height="2"/>
-        <rect x="14" y="5" width="2" height="2"/>
-        <rect x="12" y="7" width="2" height="2"/>
-        <rect x="10" y="9" width="2" height="2"/>
-        <rect x="14" y="9" width="2" height="2"/>
-      </svg>
-    `;
-
-    function updateSoundBtn() {
-      const btn = document.getElementById("sound-toggle-btn");
-      if (btn) {
-        btn.innerHTML = soundEnabled ? gbSoundOnSvg : gbSoundOffSvg;
-      }
-    }
-
-    function toggleSound() {
-      soundEnabled = !soundEnabled;
-      localStorage.setItem("todoSoundEnabled", soundEnabled);
-      updateSoundBtn();
-      if (soundEnabled) playSound("check");
-    }
-
-    function playSound(type) {
-      if (!soundEnabled) return;
-      const ctx = getAudioContext();
-      if (!ctx) return;
-
-      const now = ctx.currentTime;
-
-      if (type === "check") {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "square";
-        osc.frequency.setValueAtTime(987.77, now);
-        osc.frequency.setValueAtTime(1318.51, now + 0.08);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.3);
-      } else if (type === "uncheck") {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(440, now);
-        osc.exponentialRampToValueAtTime(220, now + 0.12);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.13);
-      } else if (type === "add") {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "square";
-        osc.frequency.setValueAtTime(659.25, now);
-        gain.gain.setValueAtTime(0.07, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.11);
-      } else if (type === "fanfare") {
-        const notes = [523.25, 659.25, 783.99, 1046.50];
-        notes.forEach((freq, idx) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const startTime = now + idx * 0.09;
-          osc.type = "square";
-          osc.frequency.setValueAtTime(freq, startTime);
-          gain.gain.setValueAtTime(0.09, startTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.22);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(startTime);
-          osc.stop(startTime + 0.24);
-        });
-      }
-    }
-
-    /* デフォルトのアバターSVG */
-    const defaultAvatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="none"/><rect x="4" y="3" width="8" height="9" fill="%23ffffff"/><rect x="3" y="5" width="10" height="6" fill="%23ffffff"/><rect x="5" y="6" width="1" height="2" fill="%23223038"/><rect x="10" y="6" width="1" height="2" fill="%23223038"/><rect x="7" y="8" width="2" height="1" fill="%23223038"/><rect x="4" y="8" width="1" height="1" fill="%23f472b6"/><rect x="11" y="8" width="1" height="1" fill="%23f472b6"/><rect x="2" y="9" width="2" height="2" fill="%23cbd5e1"/><rect x="12" y="9" width="2" height="2" fill="%23cbd5e1"/></svg>`;
+    // デフォルトアバター
+    const defaultAvatarSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="%23ffffff"/><rect x="4" y="3" width="8" height="9" fill="%23ffffff"/><rect x="3" y="5" width="10" height="6" fill="%23ffffff"/><rect x="5" y="6" width="1" height="2" fill="%233d4f58"/><rect x="10" y="6" width="1" height="2" fill="%233d4f58"/><rect x="7" y="8" width="2" height="1" fill="%233d4f58"/><rect x="4" y="8" width="1" height="1" fill="%23f472b6"/><rect x="11" y="8" width="1" height="1" fill="%23f472b6"/><rect x="2" y="9" width="2" height="2" fill="%23cbd5e1"/><rect x="12" y="9" width="2" height="2" fill="%23cbd5e1"/></svg>`;
 
     let userAvatar = localStorage.getItem("todoAppAvatar") || defaultAvatarSvg;
     document.getElementById("char-img").src = userAvatar;
@@ -853,18 +894,110 @@
       }
     }
 
-    function handleImageUpload(event) {
-      const file = event.target.files[0];
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(e) {
-        userAvatar = e.target.result;
+      reader.onload = function(event) {
+        userAvatar = event.target.result;
         document.getElementById("char-img").src = userAvatar;
         localStorage.setItem("todoAppAvatar", userAvatar);
       };
       reader.readAsDataURL(file);
     }
+
+    /* キャラのフキダシ・リアクション機能 */
+    let bubbleTimer = null;
+    function triggerCharacterReaction() {
+      const bubble = document.getElementById("speech-bubble");
+      const currentItems = data[currentCategory] || [];
+      const totalCount = currentItems.length;
+      const completedCount = currentItems.filter(i => i.checked).length;
+      const remainingCount = totalCount - completedCount;
+
+      let dialoguePool = [];
+
+      if (totalCount === 0) {
+        dialoguePool = [
+          "あたらしい タスクを ついかしてね！",
+          "きょうは なにをする？",
+          "準備万端！いつでもOK！"
+        ];
+      } else if (remainingCount === 0) {
+        // STREAK関連のセリフを削除
+        dialoguePool = [
+          "かんぺき！えらすぎる！",
+          "きょうのタスクは オールクリア！",
+          "きょうも いい1日に なったね！"
+        ];
+      } else if (remainingCount <= 2) {
+        dialoguePool = [
+          `あと${remainingCount}コ！ラストスパート！`,
+          "もうひとふんばり だ！",
+          "ゴールが みえてきたよ！",
+          "その調子！いっしょにクリアしよう！"
+        ];
+      } else {
+        dialoguePool = [
+          "ひとつずつ かたづけていこう！",
+          "まずは ひとつクリアしてみる？",
+          "マイペースで だいじょうぶ！",
+          "水分補給も わすれずにね！",
+          "焦らず いっぽずつ いこう！"
+        ];
+      }
+
+      const chosenDialogue = dialoguePool[Math.floor(Math.random() * dialoguePool.length)];
+      bubble.textContent = chosenDialogue;
+      
+      bubble.classList.remove("show");
+      void bubble.offsetWidth;
+      bubble.classList.add("show");
+
+      SoundEngine.playTalk();
+      triggerHaptic(20);
+
+      if (bubbleTimer) clearTimeout(bubbleTimer);
+      bubbleTimer = setTimeout(() => {
+        bubble.classList.remove("show");
+      }, 3000);
+    }
+
+    /* キャラボタンのタップ/長押し判定 */
+    const charBtn = document.getElementById("char-btn");
+    let charLongPressTimer = null;
+    let isLongPress = false;
+
+    charBtn.addEventListener("touchstart", (e) => {
+      isLongPress = false;
+      charLongPressTimer = setTimeout(() => {
+        isLongPress = true;
+        triggerHaptic([30, 40]);
+        openImagePicker();
+      }, 650);
+    }, { passive: true });
+
+    charBtn.addEventListener("touchend", (e) => {
+      clearTimeout(charLongPressTimer);
+      if (!isLongPress) {
+        triggerCharacterReaction();
+      }
+    });
+
+    charBtn.addEventListener("touchmove", () => {
+      clearTimeout(charLongPressTimer);
+    });
+
+    charBtn.addEventListener("click", (e) => {
+      if (!('ontouchstart' in window)) {
+        triggerCharacterReaction();
+      }
+    });
+
+    charBtn.addEventListener("dblclick", () => {
+      openImagePicker();
+    });
 
     const defaultData = {
       "General": [
@@ -916,78 +1049,69 @@
       }
     }
 
-    /* Notification Logic (Custom Message & Placeholders) */
-    let notifTime = localStorage.getItem("todoNotifTime") || "";
-    let notifMessage = localStorage.getItem("todoNotifMessage") || "Your {streak} days streak is on the line! {pending} task(s) left.";
-    let lastNotifDate = localStorage.getItem("todoLastNotifDate") || "";
+    /* Notification Logic */
+    let notifyConfig = JSON.parse(localStorage.getItem("todoNotifyConfig")) || {
+      enabled: false,
+      time: "20:00",
+      title: "Routine Reminder",
+      body: "🔥 {streak} days streak! Time to clear your list.",
+      lastNotifiedDate: ""
+    };
 
-    function openNotifModal() {
-      document.getElementById("notif-time-input").value = notifTime || "20:00";
-      document.getElementById("notif-msg-input").value = notifMessage;
-      document.getElementById("notif-modal").classList.add("open");
-    }
-    
-    function closeNotifModal() {
-      document.getElementById("notif-modal").classList.remove("open");
+    function openNotifyModal() {
+      document.getElementById("notify-enabled").checked = notifyConfig.enabled;
+      document.getElementById("notify-time-input").value = notifyConfig.time;
+      document.getElementById("notify-title-input").value = notifyConfig.title;
+      document.getElementById("notify-body-input").value = notifyConfig.body;
+      document.getElementById("notify-modal").classList.add("open");
     }
 
-    async function saveNotifSettings() {
-      if (!("Notification" in window)) {
-        alert("This browser does not support notifications.");
-        closeNotifModal();
+    function closeNotifyModal() {
+      document.getElementById("notify-modal").classList.remove("open");
+    }
+
+    async function saveNotifySettings() {
+      const isEnabled = document.getElementById("notify-enabled").checked;
+      if (isEnabled && "Notification" in window) {
+        const perm = await Notification.requestPermission();
+        if (perm !== "granted") {
+          alert("Notification permission denied in browser settings.");
+          document.getElementById("notify-enabled").checked = false;
+          return;
+        }
+      }
+
+      notifyConfig.enabled = isEnabled;
+      notifyConfig.time = document.getElementById("notify-time-input").value || "20:00";
+      notifyConfig.title = document.getElementById("notify-title-input").value.trim() || "Routine Reminder";
+      notifyConfig.body = document.getElementById("notify-body-input").value.trim() || "Time to check your list!";
+      localStorage.setItem("todoNotifyConfig", JSON.stringify(notifyConfig));
+      closeNotifyModal();
+    }
+
+    function checkDailyNotification() {
+      if (!notifyConfig.enabled || !("Notification" in window) || Notification.permission !== "granted") {
         return;
       }
 
-      let permission = Notification.permission;
-      if (permission !== "granted") {
-        permission = await Notification.requestPermission();
-      }
-
-      if (permission === "granted") {
-        notifTime = document.getElementById("notif-time-input").value;
-        const msgVal = document.getElementById("notif-msg-input").value.trim();
-        notifMessage = msgVal || "Your {streak} days streak is waiting! {pending} task(s) remaining.";
-        
-        localStorage.setItem("todoNotifTime", notifTime);
-        localStorage.setItem("todoNotifMessage", notifMessage);
-
-        const currentStreak = categoryStreaks[currentCategory] ? categoryStreaks[currentCategory].current : 0;
-        const previewMsg = notifMessage.replace(/\{streak\}/g, currentStreak).replace(/\{pending\}/g, "X");
-
-        new Notification("ToDo Notification Active", {
-          body: `Set for ${notifTime}\n"${previewMsg}"`
-        });
-      } else {
-        alert("Notification permission was denied.");
-      }
-      closeNotifModal();
-    }
-
-    function checkDailyReminder() {
-      if (!notifTime || !("Notification" in window) || Notification.permission !== "granted") return;
-
       const now = new Date();
-      const currentHm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-      const todayStr = now.toISOString().slice(0, 10);
+      const todayDateStr = now.toISOString().slice(0, 10);
+      const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-      if (currentHm === notifTime && lastNotifDate !== todayStr) {
-        let pendingCount = 0;
-        Object.keys(data).forEach(cat => {
-          pendingCount += data[cat].filter(item => !item.checked).length;
-        });
+      if (currentTimeStr >= notifyConfig.time && notifyConfig.lastNotifiedDate !== todayDateStr) {
+        const streakCount = categoryStreaks[currentCategory] ? categoryStreaks[currentCategory].current : 0;
+        const resolvedBody = notifyConfig.body.replace(/{streak}/g, streakCount);
 
-        if (pendingCount > 0) {
-          const currentStreak = categoryStreaks[currentCategory] ? categoryStreaks[currentCategory].current : 0;
-          const formattedBody = notifMessage
-            .replace(/\{streak\}/g, currentStreak)
-            .replace(/\{pending\}/g, pendingCount);
-
-          new Notification("ToDo Streak Alert", {
-            body: formattedBody
+        try {
+          new Notification(notifyConfig.title, {
+            body: resolvedBody,
+            icon: "https://fav.farm/🦭"
           });
+          notifyConfig.lastNotifiedDate = todayDateStr;
+          localStorage.setItem("todoNotifyConfig", JSON.stringify(notifyConfig));
+        } catch (e) {
+          console.error("Notification failed", e);
         }
-        lastNotifDate = todayStr;
-        localStorage.setItem("todoLastNotifDate", lastNotifDate);
       }
     }
 
@@ -1043,9 +1167,18 @@
     function toggleCompletedSection() {
       const sec = document.getElementById("completed-section");
       sec.classList.toggle("open");
+      updateAccordionArrow();
     }
 
-    function render() {
+    function updateAccordionArrow() {
+      const sec = document.getElementById("completed-section");
+      const arrow = document.getElementById("toggle-arrow");
+      if (arrow) {
+        arrow.textContent = sec.classList.contains("open") ? "▲" : "▼";
+      }
+    }
+
+    function render(highlightIndex = null) {
       categories = Object.keys(data);
 
       if (categories.length === 0) {
@@ -1058,7 +1191,7 @@
         currentCategory = categories[0];
       }
 
-      // Tabs
+      // Render Tabs
       const tabsContainer = document.getElementById("tabs-container");
       tabsContainer.innerHTML = "";
       categories.forEach(cat => {
@@ -1073,7 +1206,7 @@
         tabsContainer.appendChild(btn);
       });
 
-      // Items
+      // Render Items
       const listContainer = document.getElementById("item-list");
       const completedContainer = document.getElementById("completed-items-container");
       const completedSection = document.getElementById("completed-section");
@@ -1089,10 +1222,10 @@
         if (item.checked) completedCount++;
 
         const row = document.createElement("div");
-        row.className = `item-row ${item.checked ? "checked" : ""}`;
+        row.className = `item-row ${item.checked ? "checked" : ""} ${highlightIndex === index ? "just-checked" : ""}`;
         row.dataset.index = index;
 
-        const handleHtml = item.checked ? "" : `<div class="drag-handle">::</div>`;
+        const handleHtml = item.checked ? "" : `<div class="drag-handle">⋮</div>`;
         
         row.innerHTML = `
           ${handleHtml}
@@ -1100,7 +1233,7 @@
             <input type="checkbox" class="checkbox" ${item.checked ? "checked" : ""}>
             <span class="item-text">${escapeHtml(item.text)}</span>
           </div>
-          <button class="del-item-btn" title="Delete">×</button>
+          <button class="del-item-btn" title="Delete">✕</button>
         `;
 
         const contentDiv = row.querySelector(".item-content");
@@ -1141,9 +1274,9 @@
       });
 
       if (totalCount === 0) {
-        listContainer.innerHTML = `<div class="empty-hint">No tasks found. Add one above.</div>`;
+        listContainer.innerHTML = `<div class="empty-hint">NO TASKS FOUND.<br>ADD ONE ABOVE.</div>`;
       } else if (completedCount === totalCount) {
-        listContainer.innerHTML = `<div class="empty-hint" style="color: var(--accent-orange); font-weight: 700;">★ ALL CLEARED! ★</div>`;
+        listContainer.innerHTML = `<div class="empty-hint" style="color: var(--accent-orange); font-weight: bold;">★ ALL CLEARED! ★</div>`;
       }
 
       if (completedCount > 0) {
@@ -1153,27 +1286,35 @@
         completedSection.style.display = "none";
       }
 
+      updateAccordionArrow();
+
       const allChecked = totalCount > 0 && completedCount === totalCount;
 
       const progressPercent = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
       const fillBar = document.getElementById("progress-bar-fill");
       fillBar.style.width = `${progressPercent}%`;
 
-      document.getElementById("progress-text").textContent = `${completedCount} / ${totalCount} (${progressPercent}%)`;
+      document.getElementById("progress-text").textContent = `${completedCount}/${totalCount} (${progressPercent}%)`;
 
       const catStreak = categoryStreaks[currentCategory] ? categoryStreaks[currentCategory].current : 0;
       const streakBadge = document.getElementById("streak-display");
-      streakBadge.textContent = `★ ${catStreak} DAYS`;
+      const streakText = document.getElementById("streak-text");
+      streakText.textContent = `${catStreak} DAYS`;
       streakBadge.classList.toggle("zero", catStreak === 0);
 
       if (allChecked && !wasAllCompleted) {
-        triggerBottomConfetti();
-        playSound("fanfare");
+        triggerPixelCrackers();
+        SoundEngine.playAllClear();
         triggerHaptic([40, 60, 40]);
         updateStreakOnAllCompleted(currentCategory);
         const updatedCatStreak = categoryStreaks[currentCategory].current;
-        streakBadge.textContent = `★ ${updatedCatStreak} DAYS`;
+        streakText.textContent = `${updatedCatStreak} DAYS`;
         streakBadge.classList.remove("zero");
+
+        // 星をピクセルバウンド
+        streakBadge.classList.remove("pixel-pop");
+        void streakBadge.offsetWidth;
+        streakBadge.classList.add("pixel-pop");
       }
       wasAllCompleted = allChecked;
 
@@ -1219,10 +1360,17 @@
 
     function toggleCheck(index) {
       const willBeChecked = !data[currentCategory][index].checked;
-      triggerHaptic(20);
-      playSound(willBeChecked ? "check" : "uncheck");
       data[currentCategory][index].checked = willBeChecked;
-      render();
+
+      if (willBeChecked) {
+        SoundEngine.playCheck();
+        triggerHaptic(25);
+      } else {
+        SoundEngine.playUncheck();
+        triggerHaptic([15, 30]);
+      }
+
+      render(index);
     }
 
     function addItem(e) {
@@ -1232,7 +1380,6 @@
       if (!val) return;
 
       triggerHaptic(20);
-      playSound("add");
       if (!data[currentCategory]) data[currentCategory] = [];
       data[currentCategory].push({ text: val, checked: false });
       input.value = "";
@@ -1242,7 +1389,6 @@
 
     function deleteItem(index) {
       triggerHaptic(25);
-      playSound("uncheck");
       data[currentCategory].splice(index, 1);
       render();
     }
@@ -1382,57 +1528,61 @@
       render();
     }
 
-    /* 画面上部までウワッと打ち上がるピクセル紙吹雪エンジン */
+    /* Pixel Confetti Engine（打ち上げ速度アップ＆キビキビ動くよう調整） */
     const canvas = document.getElementById("confetti-canvas");
     const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
     let particles = [];
     let animationFrameId = null;
 
     function resizeCanvas() {
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      ctx.scale(dpr, dpr);
-      ctx.imageSmoothingEnabled = false;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
-    window.addEventListener("resize", () => {
-      if (particles.length === 0) resizeCanvas();
-    });
+    window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
-    function triggerBottomConfetti() {
-      resizeCanvas();
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const count = 110;
-      const colors = ["#d94b26", "#ffd166", "#3ea055", "#4290f5", "#ffffff", "#f97316"];
+    function createPixelParticle(x, y, angleBase, baseSpeed) {
+      const colors = ["#ff5400", "#ffd166", "#22c55e", "#0ea5e9", "#ffffff", "#3d4f58"];
+      const angle = angleBase + (Math.random() - 0.5) * 0.75;
+      const speed = Math.random() * (baseSpeed * 0.5) + baseSpeed;
 
-      for (let i = 0; i < count; i++) {
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.9;
-        const speed = Math.random() * 10 + 22;
+      return {
+        x: Math.floor(x),
+        y: Math.floor(y),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        gravity: 0.42, // 重力を上げてキビキビ落下
+        drag: 0.988,
+        size: Math.floor(Math.random() * 3 + 6),
+        color: colors[Math.floor(Math.random() * colors.length)],
+        opacity: 1
+      };
+    }
 
-        particles.push({
-          x: Math.random() * w,
-          y: h + 15,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          gravity: 0.32,
-          drag: 0.985,
-          size: Math.floor(Math.random() * 3 + 6),
-          color: colors[Math.floor(Math.random() * colors.length)],
-          opacity: 1
-        });
+    function triggerPixelCrackers() {
+      const bottomY = canvas.height + 10;
+      const countSide = 40;
+      const countCenter = 35;
+
+      // 初速 baseSpeed を高速化（14 -> 21, 15.5 -> 23.5）
+      for (let i = 0; i < countSide; i++) {
+        particles.push(createPixelParticle(canvas.width * 0.1, bottomY, -Math.PI * 0.32, 21));
+      }
+      for (let i = 0; i < countSide; i++) {
+        particles.push(createPixelParticle(canvas.width * 0.9, bottomY, -Math.PI * 0.68, 21));
+      }
+      for (let i = 0; i < countCenter; i++) {
+        particles.push(createPixelParticle(canvas.width * 0.5, bottomY, -Math.PI * 0.5, 23.5));
       }
 
       if (!animationFrameId) {
-        updateBottomConfetti();
+        updatePixelConfetti();
       }
     }
 
-    function updateBottomConfetti() {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      ctx.clearRect(0, 0, w, h);
+    function updatePixelConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -1443,11 +1593,12 @@
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.vy > 2) {
-          p.opacity -= 0.012;
+        // 下降開始時のフェード速度を上げてテンポよく消去
+        if (p.vy > 2.0) {
+          p.opacity -= 0.035;
         }
 
-        if (p.opacity <= 0 || p.y > h + 50) {
+        if (p.opacity <= 0 || p.y > canvas.height + 40) {
           particles.splice(i, 1);
           continue;
         }
@@ -1459,32 +1610,32 @@
       ctx.globalAlpha = 1.0;
 
       if (particles.length > 0) {
-        animationFrameId = requestAnimationFrame(updateBottomConfetti);
+        animationFrameId = requestAnimationFrame(updatePixelConfetti);
       } else {
-        ctx.clearRect(0, 0, w, h);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         animationFrameId = null;
       }
     }
 
+    /* 定期チェック（オートリセット・通知） */
     setInterval(() => {
       checkDailyAutoReset();
-      checkDailyReminder();
+      checkDailyNotification();
     }, 30000);
 
     window.addEventListener("focus", () => {
       checkDailyAutoReset();
-      checkDailyReminder();
+      checkDailyNotification();
     });
+
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") {
         checkDailyAutoReset();
-        checkDailyReminder();
+        checkDailyNotification();
       }
     });
 
-    updateSoundBtn();
     checkDailyAutoReset();
-    checkDailyReminder();
     render();
   </script>
 </body>
