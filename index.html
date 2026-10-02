@@ -258,7 +258,6 @@
       box-shadow: 0px 0px 0px var(--pixel-shadow);
     }
 
-    /* カテゴリ追加ボタン（タブと同じ高さ・配置に修正） */
     .add-tab-btn {
       height: 30px;
       width: 32px;
@@ -515,7 +514,6 @@
       background: var(--accent-orange);
       border-color: var(--pixel-line);
     }
-    /* GBスプライト風 8-bit ピクセルチェックマーク */
     .checkbox:checked::after {
       content: "";
       width: 10px;
@@ -1030,6 +1028,7 @@
     let currentCategory = categories[0] || "";
     let wasAllCompleted = false;
 
+    /* Auto Reset Logic */
     let autoResetTime = localStorage.getItem("todoAutoResetTime") || "04:00";
     let lastResetDate = localStorage.getItem("todoLastResetDate") || "";
 
@@ -1045,9 +1044,18 @@
       }
     }
 
+    // 初回起動時やタスキル後に勝手にリセットされないよう修正
     function checkDailyAutoReset() {
       const targetResetDate = getLogicalDateString();
 
+      // 初回起動（まだ日付が記録されていない場合）は、現在の論理日付をセットするのみでリセットはしない
+      if (!lastResetDate) {
+        lastResetDate = targetResetDate;
+        localStorage.setItem("todoLastResetDate", lastResetDate);
+        return;
+      }
+
+      // 日付が切り替わった時のみリセットを実行
       if (lastResetDate !== targetResetDate) {
         Object.keys(data).forEach(cat => {
           data[cat] = data[cat].map(item => ({ ...item, checked: false }));
@@ -1059,6 +1067,7 @@
       }
     }
 
+    /* Notification Logic */
     let notifyConfig = JSON.parse(localStorage.getItem("todoNotifyConfig")) || {
       enabled: false,
       time: "20:00",
@@ -1162,8 +1171,8 @@
       if (val) {
         autoResetTime = val;
         localStorage.setItem("todoAutoResetTime", autoResetTime);
-        lastResetDate = "";
-        checkDailyAutoReset();
+        lastResetDate = getLogicalDateString(); // リセット時間変更時も当日の日付を入れて即座にリセットが走るのを防ぐ
+        localStorage.setItem("todoLastResetDate", lastResetDate);
       }
       closeResetModal();
     }
